@@ -1,0 +1,7 @@
+# Временно пока нет CI
+
+npx lint-staged
+npm run lint:css
+npm run lint:ts
+
+npm run test

@@ -19,12 +19,12 @@ export const CanvasReact = () => {
   return (
     <div style={{width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex'}}>
       <div style={{display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '150px', height: '100dvh'}}>
-        <button onClick={() => canvasManager?.addNode(NodeType.htmlElement, 'div')}>Add div</button>
-        <button onClick={() => canvasManager?.addNode(NodeType.htmlElement, 'button')}>Add button</button>
-        <button onClick={() => canvasManager?.addNode(NodeType.style)}>Add styles</button>
-        <button onClick={() => canvasManager?.addNode(NodeType.variable)}>Add variable</button>
-        <button onClick={() => canvasManager?.addNode(NodeType.event)}>Add Event</button>
-        <button onClick={() => canvasManager?.addNode(NodeType.function)}>Add function</button>
+        <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.htmlElement, 'div')}>Add div</button>
+        <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.htmlElement, 'button')}>Add button</button>
+        <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.style)}>Add styles</button>
+        <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.variable)}>Add variable</button>
+        <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.event)}>Add Event</button>
+        <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.function)}>Add function</button>
       </div>
 
       <div style={{position: 'relative'}}>

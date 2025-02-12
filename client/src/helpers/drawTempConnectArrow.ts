@@ -1,155 +1,5 @@
-import {canvasQuadroSize, defaultNodeSize} from './CanvasReact.constants';
-import {canvasWindowOptions, scale} from './CanvasReact.state';
-import {ConnectSide, Point} from './CanvasReact.types';
-
-interface RoundedRectParams {
-  ctx: CanvasRenderingContext2D;
-  x: number;
-  y: number;
-  width?: number;
-  height?: number;
-  radius?: number;
-  fillColor?: string;
-  strokeColor?: string;
-}
-
-/** Отрисовка прямоугольника с закругленными углами */
-export const drawRoundedRect = ({
-  ctx,
-  x,
-  y,
-  height = defaultNodeSize.height,
-  width = defaultNodeSize.width,
-  radius = defaultNodeSize.radius,
-  fillColor = 'white',
-  strokeColor = 'black',
-}: RoundedRectParams) => {
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-
-  ctx.closePath();
-  ctx.fillStyle = fillColor;
-  ctx.fill();
-
-  ctx.lineWidth = 3 * scale;
-  ctx.strokeStyle = strokeColor;
-  ctx.stroke();
-};
-
-interface CircleParams {
-  ctx: CanvasRenderingContext2D;
-  x: number;
-  y: number;
-  radius: number;
-  fillColor: string;
-  strokeColor: string;
-}
-
-/** Рисование круга */
-export const drawCircle = ({ctx, x, y, radius, fillColor, strokeColor}: CircleParams) => {
-  ctx.strokeStyle = strokeColor;
-  ctx.fillStyle = fillColor;
-  ctx.beginPath();
-  ctx.arc(x, y, radius, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.stroke();
-};
-
-interface TextParams {
-  ctx: CanvasRenderingContext2D;
-  x: number;
-  y: number;
-  fillColor: string;
-  font: number;
-  textAlign: CanvasTextAlign;
-  text: string;
-}
-
-/** Рисование текста */
-export const drawText = ({ctx, x, y, fillColor, font, textAlign, text}: TextParams) => {
-  ctx.font = font + 'px Arial';
-  ctx.fillStyle = fillColor;
-  ctx.textAlign = textAlign;
-  ctx.fillText(text, x, y);
-};
-
-interface ArrowParams {
-  ctx: CanvasRenderingContext2D;
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
-  arrowHeight: number;
-  arrowWidth: number;
-  color?: string;
-}
-
-/** Рисование стрелки */
-export const drawArrow = ({ctx, startX, startY, endX, endY, arrowWidth, arrowHeight, color = 'black'}: ArrowParams) => {
-  // Настройка цвета заливки и обводки
-  ctx.fillStyle = color;
-  ctx.strokeStyle = color;
-  ctx.lineWidth = arrowWidth;
-
-  // Рисуем основную линию стрелки
-  ctx.beginPath();
-  ctx.moveTo(startX, startY);
-  ctx.lineTo(endX, endY);
-  ctx.stroke();
-
-  // Вычисляем угол наклона стрелки
-  const angle = Math.atan2(endY - startY, endX - startX);
-  const arrowHeadX = endX + (arrowHeight / 3) * Math.cos(angle);
-  const arrowHeadY = endY + (arrowHeight / 3) * Math.sin(angle);
-
-  // Координаты для наконечника стрелки
-  const arrowPoint1X = arrowHeadX - arrowHeight * Math.cos(angle - Math.PI / 6);
-  const arrowPoint1Y = arrowHeadY - arrowHeight * Math.sin(angle - Math.PI / 6);
-  const arrowPoint2X = arrowHeadX - arrowHeight * Math.cos(angle + Math.PI / 6);
-  const arrowPoint2Y = arrowHeadY - arrowHeight * Math.sin(angle + Math.PI / 6);
-
-  // Рисуем наконечник стрелки в виде треугольника
-  ctx.beginPath();
-  ctx.moveTo(arrowHeadX, arrowHeadY);
-  ctx.lineTo(arrowPoint1X, arrowPoint1Y);
-  ctx.lineTo(arrowPoint2X, arrowPoint2Y);
-  ctx.closePath();
-  ctx.fill();
-};
-
-interface HoverArrowsParams {
-  ctx: CanvasRenderingContext2D;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-/** Рисование 4 стрелок при наведении */
-export const drawHoverArrows = ({ctx, x, y, width, height}: HoverArrowsParams) => {
-  const arrowWidth = 3;
-  const arrowHeight = 12;
-  const color = 'lightblue';
-
-  const arrows = [
-    {startX: x + width / 2, startY: y, endX: x + width / 2, endY: y - 20}, // Вверх
-    {startX: x + width, startY: y + height / 2, endX: x + width + 20, endY: y + height / 2}, // Вправо
-    {startX: x + width / 2, startY: y + height, endX: x + width / 2, endY: y + height + 20}, // Вниз
-    {startX: x, startY: y + height / 2, endX: x - 20, endY: y + height / 2}, // Влево
-  ];
-
-  arrows.forEach(({startX, startY, endX, endY}) => {
-    drawArrow({ctx, startX, startY, endX, endY, arrowWidth, arrowHeight, color});
-  });
-};
+import {CANVAS_WINDOW_OPTIONS, SCALE} from '../components/CanvasReact/CanvasReact.state';
+import {ConnectSide} from '../components/CanvasReact/CanvasReact.types';
 
 interface ConnectArrowParams {
   ctx: CanvasRenderingContext2D;
@@ -183,8 +33,8 @@ const getConnectedArrowPathForTop = ({
   const path = [currPoint];
   const finalPath = [];
 
-  const padding = 25 * scale;
-  const margin = 20 * scale;
+  const padding = 25 * SCALE;
+  const margin = 20 * SCALE;
   const gap = padding + margin;
 
   // Если навелись на входную точку соединения
@@ -476,12 +326,12 @@ export const drawTempConnectArrow = ({
   nodeFinishParams,
 }: ConnectArrowParams) => {
   const path = getArrowPath({startX, startY, endX, endY, nodeParams, side, finishSide, nodeFinishParams});
-  const arrowHeight = 12 * scale;
+  const arrowHeight = 12 * SCALE;
 
   // Настройка цвета заливки и обводки
   ctx.fillStyle = 'black';
   ctx.strokeStyle = 'black';
-  ctx.lineWidth = 3 * scale;
+  ctx.lineWidth = 3 * SCALE;
 
   // Рисуем основную линию стрелки
   ctx.beginPath();
@@ -513,81 +363,5 @@ export const drawTempConnectArrow = ({
   ctx.closePath();
   ctx.fill();
 
-  return path.map((point) => ({x: point.x / scale + canvasWindowOptions.min.x, y: point.y / scale + canvasWindowOptions.min.y}));
-};
-
-/** Перерисование стрелки уже созданной */
-export const drawConnectArrow = (ctx: CanvasRenderingContext2D, path: Point[]) => {
-  const arrowHeight = 12 * scale;
-  const startX = (path[0].x - canvasWindowOptions.min.x) * scale;
-  const startY = (path[0].y - canvasWindowOptions.min.y) * scale;
-  const endX = (path[path.length - 1].x - canvasWindowOptions.min.x) * scale;
-  const endY = (path[path.length - 1].y - canvasWindowOptions.min.y) * scale;
-
-  // Настройка цвета заливки и обводки
-  ctx.fillStyle = 'black';
-  ctx.strokeStyle = 'black';
-  ctx.lineWidth = 3 * scale;
-
-  // Рисуем основную линию стрелки
-  ctx.beginPath();
-  ctx.moveTo(startX, startY);
-
-  for (const {x, y} of path) {
-    ctx.lineTo((x - canvasWindowOptions.min.x) * scale, (y - canvasWindowOptions.min.y) * scale);
-    ctx.stroke();
-  }
-
-  // Вычисляем угол наклона стрелки
-  const angle = Math.atan2(path[path.length - 1].y - path[path.length - 2].y, path[path.length - 1].x - path[path.length - 2].x);
-  const arrowHeadX = endX + (arrowHeight / 3) * Math.cos(angle);
-  const arrowHeadY = endY + (arrowHeight / 3) * Math.sin(angle);
-
-  // Координаты для наконечника стрелки
-  const arrowPoint1X = arrowHeadX - arrowHeight * Math.cos(angle - Math.PI / 6);
-  const arrowPoint1Y = arrowHeadY - arrowHeight * Math.sin(angle - Math.PI / 6);
-  const arrowPoint2X = arrowHeadX - arrowHeight * Math.cos(angle + Math.PI / 6);
-  const arrowPoint2Y = arrowHeadY - arrowHeight * Math.sin(angle + Math.PI / 6);
-
-  // Рисуем наконечник стрелки в виде треугольника
-  ctx.beginPath();
-  ctx.moveTo(arrowHeadX, arrowHeadY);
-  ctx.lineTo(arrowPoint1X, arrowPoint1Y);
-  ctx.lineTo(arrowPoint2X, arrowPoint2Y);
-  ctx.closePath();
-  ctx.fill();
-};
-
-/** Рисование фоновой сетки */
-export const drawGrid = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
-  ctx.lineWidth = 0.1;
-
-  // Если scale слишком мал, то увеличиваем размер квадратов фоновой сетки
-  const sizes = [
-    [0.5, canvasQuadroSize * 2],
-    [0.2, canvasQuadroSize * 5],
-    [0.1, canvasQuadroSize * 10],
-    [0.05, canvasQuadroSize * 20],
-  ];
-  const quadroSize = sizes.reduce((acc, curr) => (curr[0] > scale ? curr[1] : acc), canvasQuadroSize);
-
-  const left = (Math.ceil(canvasWindowOptions.min.x / quadroSize) * quadroSize - canvasWindowOptions.min.x) * scale;
-  const top = (Math.ceil(canvasWindowOptions.min.y / quadroSize) * quadroSize - canvasWindowOptions.min.y) * scale;
-
-  // Рисуем вертикальные линии
-  for (let x = left; x <= width; x += quadroSize * scale) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, height);
-    ctx.stroke();
-  }
-
-  // Рисуем горизонтальные линии
-  for (let y = top; y <= height; y += quadroSize * scale) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(width, y);
-    ctx.stroke();
-  }
+  return path.map((point) => ({x: point.x / SCALE + CANVAS_WINDOW_OPTIONS.min.x, y: point.y / SCALE + CANVAS_WINDOW_OPTIONS.min.y}));
 };

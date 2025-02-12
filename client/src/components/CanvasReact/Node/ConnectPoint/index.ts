@@ -1,11 +1,10 @@
-import {connectPointRadius} from '../../CanvasReact.constants';
+import {CONNECT_POINT_RADIUS} from '../../CanvasReact.constants';
 import {Node} from '..';
-import {scale} from '../../CanvasReact.state';
+import {SCALE} from '../../CanvasReact.state';
 import {ConnectSide, ElementType, Point} from '../../CanvasReact.types';
 
 interface CreateConnectPoint {
   side: ConnectSide;
-  isConnected?: boolean;
   x: number;
   y: number;
   radius?: number;
@@ -13,18 +12,16 @@ interface CreateConnectPoint {
 }
 
 export class ConnectPoint {
+  private x: number;
+  private y: number;
+  private radius: number;
   public side: ConnectSide;
-  public isConnected: boolean;
-  public x: number;
-  public y: number;
-  public radius: number;
-  public elementType = ElementType.ConnectPoint;
   public node: Node;
+  public elementType = ElementType.ConnectPoint;
   public connected = false;
 
-  constructor({side, isConnected = false, x, y, radius = connectPointRadius, node}: CreateConnectPoint) {
+  constructor({side, x, y, radius = CONNECT_POINT_RADIUS, node}: CreateConnectPoint) {
     this.side = side;
-    this.isConnected = isConnected;
     this.x = x;
     this.y = y;
     this.radius = radius;
@@ -33,16 +30,16 @@ export class ConnectPoint {
 
   get position() {
     return {
-      x: this.node.position.x + this.x * scale,
-      y: this.node.position.y + this.y * scale,
+      x: this.node.position.x + this.x * SCALE,
+      y: this.node.position.y + this.y * SCALE,
     };
   }
 
   // Проверяем, попала ли мышь на точку
-  isInsidePoint(mousePos: Point) {
+  public isPointInside(mousePos: Point) {
     // Вычисление квадратов расстояний
-    const distanceSquared = (mousePos.x - this.x * scale) ** 2 + (mousePos.y - this.y * scale) ** 2;
-    const radiusSquared = (this.radius * scale) ** 2;
+    const distanceSquared = (mousePos.x - this.x * SCALE) ** 2 + (mousePos.y - this.y * SCALE) ** 2;
+    const radiusSquared = (this.radius * SCALE) ** 2;
 
     // Возвращаем true, если расстояние до точки меньше или равно радиусу
     return distanceSquared <= radiusSquared;

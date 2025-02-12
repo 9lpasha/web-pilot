@@ -1,16 +1,19 @@
 import {CanvasManager} from '../CanvasManager';
-import {drawTempConnectArrow} from '../CanvasReact.helpers';
 import {Arrow, Point} from '../CanvasReact.types';
+import {drawTempConnectArrow} from '../../../helpers';
 import {ConnectPoint} from '../Node/ConnectPoint';
 
-// Класс для соединения фигур стрелками
+/** Класс для соединения фигур стрелками */
 export class ArrowManager {
   public arrows: Arrow[] = [];
-  private manager: CanvasManager;
+  /** Создаваемая стрелка */
+  public tempArrow: undefined | Arrow;
+  /** Стартовая точка, из которой перетаскиваем ноду */
+  public startArrowPoint: undefined | ConnectPoint;
+  /** Финишная точка, из которой перетаскиваем ноду */
+  public finishArrowPoint: undefined | ConnectPoint;
 
-  constructor(manager: CanvasManager) {
-    this.manager = manager;
-  }
+  constructor(private manager: CanvasManager) {}
 
   // Добавление стрелки между двумя фигурами
   public addArrow({from, to, path}: {from: ConnectPoint; to: ConnectPoint; path: Point[]}) {
@@ -21,8 +24,9 @@ export class ArrowManager {
 
   // Рисование временной стрелки (во время перетягивания)
   public drawTempArrow(e: MouseEvent, point: ConnectPoint) {
-    const startX = point.position.x as number;
-    const startY = point.position.y as number;
+    const {nodesManager, canvasRenderer} = this.manager;
+    const startX = point.position.x;
+    const startY = point.position.y;
 
     const node = point.node;
     const nodeParams = {
@@ -30,12 +34,12 @@ export class ArrowManager {
       height: node.size.height,
     };
 
-    this.manager.draw();
+    canvasRenderer.draw();
 
     let path: Point[] = [];
 
     {
-      const nodes = this.manager.nodes.filter((fig) => fig.isPointInside({x: e.offsetX, y: e.offsetY}));
+      const nodes = nodesManager.nodes.filter((fig) => fig.isPointInside({x: e.offsetX, y: e.offsetY}));
       const node = nodes.sort((a, b) => b.zIndex - a.zIndex)?.[0];
 
       if (node) {
@@ -46,46 +50,45 @@ export class ArrowManager {
 
         const point = node.checkInsideConnectPoints(mousePos);
 
-        if (point && point.node !== this.manager.startArrowPoint?.node) {
-          this.manager.finishArrowPoint = point;
+        if (point && point.node !== this.startArrowPoint?.node) {
+          this.finishArrowPoint = point;
           path = drawTempConnectArrow({
-            ctx: this.manager.ctxTemp,
+            ctx: canvasRenderer.ctxTemp,
             startX,
             startY,
             endX: point.position.x,
             endY: point.position.y,
             nodeParams,
-            side: (this.manager.startArrowPoint as ConnectPoint).side,
+            side: (this.startArrowPoint as ConnectPoint).side,
             finishSide: point.side,
             nodeFinishParams: {width: point.node.size.width, height: point.node.size.height},
           });
         } else {
-          this.manager.finishArrowPoint = undefined;
+          this.finishArrowPoint = undefined;
           path = drawTempConnectArrow({
-            ctx: this.manager.ctxTemp,
+            ctx: canvasRenderer.ctxTemp,
             startX,
             startY,
             endX: e.offsetX,
             endY: e.offsetY,
             nodeParams,
-            side: (this.manager.startArrowPoint as ConnectPoint).side,
+            side: (this.startArrowPoint as ConnectPoint).side,
           });
         }
       } else {
-        this.manager.finishArrowPoint = undefined;
+        this.finishArrowPoint = undefined;
         path = drawTempConnectArrow({
-          ctx: this.manager.ctxTemp,
+          ctx: canvasRenderer.ctxTemp,
           startX,
           startY,
           endX: e.offsetX,
           endY: e.offsetY,
           nodeParams,
-          side: (this.manager.startArrowPoint as ConnectPoint).side,
+          side: (this.startArrowPoint as ConnectPoint).side,
         });
       }
     }
 
-    if (this.manager.startArrowPoint && this.manager.finishArrowPoint)
-      this.manager.tempArrow = {from: this.manager.startArrowPoint, to: this.manager.finishArrowPoint, path};
+    if (this.startArrowPoint && this.finishArrowPoint) this.tempArrow = {from: this.startArrowPoint, to: this.finishArrowPoint, path};
   }
 }

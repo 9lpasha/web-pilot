@@ -1,5 +1,5 @@
-import {CANVAS_WINDOW_OPTIONS, SCALE} from '../components/CanvasReact/CanvasReact.state';
-import {ConnectSide} from '../components/CanvasReact/CanvasReact.types';
+import {Point, Sizes, ConnectSide} from '@/types';
+import {CANVAS_WINDOW_OPTIONS, SCALE} from '@/components/CanvasReact/CanvasReact.state';
 
 interface ConnectArrowParams {
   ctx: CanvasRenderingContext2D;
@@ -7,10 +7,7 @@ interface ConnectArrowParams {
   startY: number;
   endX: number;
   endY: number;
-  nodeParams: {
-    width: number;
-    height: number;
-  };
+  nodeParams: Sizes;
   side: ConnectSide;
   finishSide?: ConnectSide;
   nodeFinishParams?: {
@@ -324,7 +321,7 @@ export const drawTempConnectArrow = ({
   side,
   finishSide,
   nodeFinishParams,
-}: ConnectArrowParams) => {
+}: ConnectArrowParams): Point[] => {
   const path = getArrowPath({startX, startY, endX, endY, nodeParams, side, finishSide, nodeFinishParams});
   const arrowHeight = 12 * SCALE;
 

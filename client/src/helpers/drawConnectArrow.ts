@@ -1,5 +1,5 @@
-import {CANVAS_WINDOW_OPTIONS, SCALE} from '../components/CanvasReact/CanvasReact.state';
-import {Point} from '../components/CanvasReact/CanvasReact.types';
+import {CANVAS_WINDOW_OPTIONS, SCALE} from '@/components/CanvasReact/CanvasReact.state';
+import {Point} from '@/types';
 
 /** Перерисование стрелки уже созданной */
 export const drawConnectArrow = (ctx: CanvasRenderingContext2D, path: Point[]) => {

@@ -1,5 +1,5 @@
-import {DEFAULT_NODE_SIZE} from '../components/CanvasReact/CanvasReact.constants';
-import {SCALE} from '../components/CanvasReact/CanvasReact.state';
+import {DEFAULT_NODE_SIZE} from '@/components/CanvasReact/CanvasReact.constants';
+import {SCALE} from '@/components/CanvasReact/CanvasReact.state';
 
 interface RoundedRectParams {
   ctx: CanvasRenderingContext2D;

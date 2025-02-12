@@ -1,6 +1,6 @@
 import {ArrowManager} from '../ArrowManager';
 import {CanvasController} from '../CanvasController';
-import {DEFAULT_CANVAS_SIZE} from '../CanvasReact.constants';
+import {DEFAULT_CANVAS_SIZE, SIDEBAR_WIDTH} from '../CanvasReact.constants';
 import {SCALE, setCanvasHtmlOptions, setCanvasWindowOptions, setFullCanvasSize, updateScale} from '../CanvasReact.state';
 import {CanvasRenderer} from '../CanvasRenderer';
 import {NodesManager} from '../NodesManager';
@@ -11,7 +11,7 @@ export class CanvasManager {
   public arrowManager: ArrowManager;
   /** управляет работой со нодами */
   public nodesManager: NodesManager;
-  /** рисует */
+  /** рисует базовую часть полотна */
   public canvasRenderer: CanvasRenderer;
   /** управляет пользовательскими действиями */
   public canvasController: CanvasController;
@@ -22,13 +22,13 @@ export class CanvasManager {
     const ctxTemp = canvasTemp.getContext('2d')!;
     this.canvasRenderer = new CanvasRenderer(this, ctx, ctxBack, canvas, ctxTemp);
 
-    this.nodesManager = new NodesManager(this, []);
+    this.nodesManager = new NodesManager(this);
 
     this.canvasController = new CanvasController(this);
 
     this.arrowManager = new ArrowManager(this);
 
-    const canvasInnerW = window.innerWidth - 150;
+    const canvasInnerW = window.innerWidth - SIDEBAR_WIDTH;
     const canvasInnerH = window.innerHeight;
     const ratio = canvasInnerW / canvasInnerH;
 

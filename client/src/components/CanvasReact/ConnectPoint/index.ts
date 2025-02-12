@@ -1,7 +1,8 @@
-import {CONNECT_POINT_RADIUS} from '../../CanvasReact.constants';
-import {Node} from '..';
-import {SCALE} from '../../CanvasReact.state';
-import {ConnectSide, ElementType, Point} from '../../CanvasReact.types';
+import {Point, ConnectSide} from '@/types';
+import {CONNECT_POINT_RADIUS} from '../CanvasReact.constants';
+import {Node} from '../Node';
+import {SCALE} from '../CanvasReact.state';
+import {ElementType} from '../CanvasReact.types';
 
 interface CreateConnectPoint {
   side: ConnectSide;
@@ -35,13 +36,12 @@ export class ConnectPoint {
     };
   }
 
-  // Проверяем, попала ли мышь на точку
+  /** Проверка, попала ли мышь на точку */
   public isPointInside(mousePos: Point) {
     // Вычисление квадратов расстояний
     const distanceSquared = (mousePos.x - this.x * SCALE) ** 2 + (mousePos.y - this.y * SCALE) ** 2;
     const radiusSquared = (this.radius * SCALE) ** 2;
 
-    // Возвращаем true, если расстояние до точки меньше или равно радиусу
     return distanceSquared <= radiusSquared;
   }
 }

@@ -2,15 +2,15 @@ import {drawTempConnectArrow} from '@/helpers';
 import {CanvasManager} from '../CanvasManager';
 import {CANVAS_QUADRO_SIZE, DEFAULT_NODE_SIZE} from '../CanvasReact.constants';
 import {CANVAS_WINDOW_OPTIONS} from '../CanvasReact.state';
-import {NodeType} from '../CanvasReact.types';
+import {Arrow, NodeType} from '../CanvasReact.types';
 import {Node} from '../Node';
+import {Point} from '@/types';
 
 /** Класс для управления нодами */
 export class NodesManager {
-  constructor(
-    private manager: CanvasManager,
-    public nodes: Node[] = [],
-  ) {}
+  public nodes: Node[] = [];
+
+  constructor(private manager: CanvasManager) {}
 
   public addNode(type: NodeType, tagName?: keyof HTMLElementTagNameMap) {
     // Создание позиции по сетке ближе к центру экрана
@@ -37,6 +37,24 @@ export class NodesManager {
     this.manager.canvasRenderer.draw();
   }
 
+  /** Расчет пути временной стрелки */
+  private calculatePath(startX: number, startY: number, endX: number, endY: number, arrow: Arrow): Point[] {
+    const side = arrow.from.side;
+    const nodeParams = {width: arrow.from.node.size.width, height: arrow.from.node.size.height};
+
+    return drawTempConnectArrow({
+      ctx: this.manager.canvasRenderer.ctxTemp,
+      startX,
+      startY,
+      endX,
+      endY,
+      nodeParams,
+      side,
+      finishSide: arrow.to.side,
+      nodeFinishParams: arrow.to.node.size,
+    });
+  }
+
   /** Перемещение ноды */
   public moveNode(node: Node) {
     const {arrowManager, canvasRenderer} = this.manager;
@@ -45,43 +63,21 @@ export class NodesManager {
       const arrowsTop = arrowManager.arrows.filter((arrow) => arrow.to === node.connectPoints.top || arrow.from === node.connectPoints.top);
 
       for (const arrow of arrowsTop) {
-        const side = arrow.from.side;
-        const nodeParams = {width: arrow.from.node.size.width, height: arrow.from.node.size.height};
-
         if (arrow.from === node.connectPoints.top) {
           const startX = node.connectPoints.top.position.x;
           const startY = node.connectPoints.top.position.y;
           const endX = arrow.to.position.x;
           const endY = arrow.to.position.y;
+          const path = this.calculatePath(startX, startY, endX, endY, arrow);
 
-          const path = drawTempConnectArrow({
-            ctx: canvasRenderer.ctxTemp,
-            startX,
-            startY,
-            endX,
-            endY,
-            side,
-            nodeParams,
-            finishSide: arrow.to.side,
-            nodeFinishParams: arrow.to.node.size,
-          });
           arrow.path = path;
         } else if (arrow.to === node.connectPoints.top) {
           const startX = arrow.from.position.x;
           const startY = arrow.from.position.y;
           const endX = node.connectPoints.top.position.x;
           const endY = node.connectPoints.top.position.y;
-          const path = drawTempConnectArrow({
-            ctx: canvasRenderer.ctxTemp,
-            startX,
-            startY,
-            endX,
-            endY,
-            side,
-            nodeParams,
-            finishSide: arrow.to.side,
-            nodeFinishParams: arrow.to.node.size,
-          });
+          const path = this.calculatePath(startX, startY, endX, endY, arrow);
+
           arrow.path = path;
         }
       }
@@ -93,43 +89,21 @@ export class NodesManager {
       );
 
       for (const arrow of arrowsRight) {
-        const side = arrow.from.side;
-        const nodeParams = {width: arrow.from.node.size.width, height: arrow.from.node.size.height};
-
         if (arrow.from === node.connectPoints.right) {
           const startX = node.connectPoints.right.position.x;
           const startY = node.connectPoints.right.position.y;
           const endX = arrow.to.position.x;
           const endY = arrow.to.position.y;
+          const path = this.calculatePath(startX, startY, endX, endY, arrow);
 
-          const path = drawTempConnectArrow({
-            ctx: canvasRenderer.ctxTemp,
-            startX,
-            startY,
-            endX,
-            endY,
-            side,
-            nodeParams,
-            finishSide: arrow.to.side,
-            nodeFinishParams: arrow.to.node.size,
-          });
           arrow.path = path;
         } else if (arrow.to === node.connectPoints.right) {
           const startX = arrow.from.position.x;
           const startY = arrow.from.position.y;
           const endX = node.connectPoints.right.position.x;
           const endY = node.connectPoints.right.position.y;
-          const path = drawTempConnectArrow({
-            ctx: canvasRenderer.ctxTemp,
-            startX,
-            startY,
-            endX,
-            endY,
-            side,
-            nodeParams,
-            finishSide: arrow.to.side,
-            nodeFinishParams: arrow.to.node.size,
-          });
+          const path = this.calculatePath(startX, startY, endX, endY, arrow);
+
           arrow.path = path;
         }
       }
@@ -141,43 +115,21 @@ export class NodesManager {
       );
 
       for (const arrow of arrowsBottom) {
-        const side = arrow.from.side;
-        const nodeParams = {width: arrow.from.node.size.width, height: arrow.from.node.size.height};
-
         if (arrow.from === node.connectPoints.bottom) {
           const startX = node.connectPoints.bottom.position.x;
           const startY = node.connectPoints.bottom.position.y;
           const endX = arrow.to.position.x;
           const endY = arrow.to.position.y;
+          const path = this.calculatePath(startX, startY, endX, endY, arrow);
 
-          const path = drawTempConnectArrow({
-            ctx: canvasRenderer.ctxTemp,
-            startX,
-            startY,
-            endX,
-            endY,
-            side,
-            nodeParams,
-            finishSide: arrow.to.side,
-            nodeFinishParams: arrow.to.node.size,
-          });
           arrow.path = path;
         } else if (arrow.to === node.connectPoints.bottom) {
           const startX = arrow.from.position.x;
           const startY = arrow.from.position.y;
           const endX = node.connectPoints.bottom.position.x;
           const endY = node.connectPoints.bottom.position.y;
-          const path = drawTempConnectArrow({
-            ctx: canvasRenderer.ctxTemp,
-            startX,
-            startY,
-            endX,
-            endY,
-            side,
-            nodeParams,
-            finishSide: arrow.to.side,
-            nodeFinishParams: arrow.to.node.size,
-          });
+          const path = this.calculatePath(startX, startY, endX, endY, arrow);
+
           arrow.path = path;
         }
       }
@@ -189,43 +141,21 @@ export class NodesManager {
       );
 
       for (const arrow of arrowsLeft) {
-        const side = arrow.from.side;
-        const nodeParams = {width: arrow.from.node.size.width, height: arrow.from.node.size.height};
-
         if (arrow.from === node.connectPoints.left) {
           const startX = node.connectPoints.left.position.x;
           const startY = node.connectPoints.left.position.y;
           const endX = arrow.to.position.x;
           const endY = arrow.to.position.y;
+          const path = this.calculatePath(startX, startY, endX, endY, arrow);
 
-          const path = drawTempConnectArrow({
-            ctx: canvasRenderer.ctxTemp,
-            startX,
-            startY,
-            endX,
-            endY,
-            side,
-            nodeParams,
-            finishSide: arrow.to.side,
-            nodeFinishParams: arrow.to.node.size,
-          });
           arrow.path = path;
         } else if (arrow.to === node.connectPoints.left) {
           const startX = arrow.from.position.x;
           const startY = arrow.from.position.y;
           const endX = node.connectPoints.left.position.x;
           const endY = node.connectPoints.left.position.y;
-          const path = drawTempConnectArrow({
-            ctx: canvasRenderer.ctxTemp,
-            startX,
-            startY,
-            endX,
-            endY,
-            side,
-            nodeParams,
-            finishSide: arrow.to.side,
-            nodeFinishParams: arrow.to.node.size,
-          });
+          const path = this.calculatePath(startX, startY, endX, endY, arrow);
+
           arrow.path = path;
         }
       }

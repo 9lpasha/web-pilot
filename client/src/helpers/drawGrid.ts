@@ -1,5 +1,5 @@
-import {CANVAS_QUADRO_SIZE} from '../components/CanvasReact/CanvasReact.constants';
-import {CANVAS_WINDOW_OPTIONS, SCALE} from '../components/CanvasReact/CanvasReact.state';
+import {CANVAS_QUADRO_SIZE} from '@/components/CanvasReact/CanvasReact.constants';
+import {CANVAS_WINDOW_OPTIONS, SCALE} from '@/components/CanvasReact/CanvasReact.state';
 
 /** Рисование фоновой сетки */
 export const drawGrid = (ctx: CanvasRenderingContext2D, width: number, height: number) => {

@@ -1,6 +1,7 @@
-import {Sizes} from './CanvasReact.types';
+import {Sizes} from '@/types';
 
 export const DEFAULT_CANVAS_SIZE: Sizes = {height: 9000, width: 16000};
+export const SIDEBAR_WIDTH = 150;
 
 export const DEFAULT_NODE_SIZE = {
   width: 300,

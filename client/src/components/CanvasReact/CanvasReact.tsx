@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {CanvasManager} from './CanvasManager';
 import {NodeType} from './CanvasReact.types';
+import {SIDEBAR_WIDTH} from './CanvasReact.constants';
 
 export const CanvasReact = () => {
   const [canvasManager, setCanvasManager] = useState<CanvasManager>();
@@ -18,7 +19,7 @@ export const CanvasReact = () => {
 
   return (
     <div style={{width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex'}}>
-      <div style={{display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '150px', height: '100dvh'}}>
+      <div style={{display: 'flex', flexDirection: 'column', gap: '10px', minWidth: SIDEBAR_WIDTH, height: '100dvh'}}>
         <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.htmlElement, 'div')}>Add div</button>
         <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.htmlElement, 'button')}>Add button</button>
         <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.style)}>Add styles</button>

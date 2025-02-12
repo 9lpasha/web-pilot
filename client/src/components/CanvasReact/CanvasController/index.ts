@@ -1,5 +1,5 @@
 import {CanvasManager} from '../CanvasManager';
-import {CANVAS_QUADRO_SIZE} from '../CanvasReact.constants';
+import {CANVAS_QUADRO_SIZE, SIDEBAR_WIDTH} from '../CanvasReact.constants';
 import {
   CANVAS_HTML_OPTIONS,
   CANVAS_WINDOW_OPTIONS,
@@ -10,7 +10,7 @@ import {
 } from '../CanvasReact.state';
 import {ActionsState, ElementType, WithPrevState} from '../CanvasReact.types';
 import {Node} from '../Node';
-import {ConnectPoint} from '../Node/ConnectPoint';
+import {ConnectPoint} from '../ConnectPoint';
 
 export class CanvasController {
   /** Состояние канваса */
@@ -28,7 +28,7 @@ export class CanvasController {
   /** Нода или точка перетаскивания в состоянии hover */
   public hoverItem: WithPrevState<ConnectPoint | Node> = {prev: null, current: null};
   /** Перетаскиваемая нода */
-  public movingNode: undefined | Node;
+  public movingNode: null | Node = null;
 
   constructor(private manager: CanvasManager) {}
 
@@ -78,60 +78,70 @@ export class CanvasController {
   public handleMouseMove(e: MouseEvent): void {
     const {nodesManager, canvasRenderer, arrowManager} = this.manager;
 
-    if (this.state === ActionsState.movingCanvas) {
-      this.moveCanvas(-e.movementX, -e.movementY);
-    } else if (this.state === ActionsState.movingNode) {
-      const node = this.movingNode;
+    switch (this.state) {
+      case ActionsState.movingCanvas: {
+        this.moveCanvas(-e.movementX, -e.movementY);
 
-      if (!node) return;
-
-      this.currentMovingNodePosition = {
-        x: this.currentMovingNodePosition.x + e.movementX,
-        y: this.currentMovingNodePosition.y + e.movementY,
-      };
-
-      // Перевод в абсолютные координаты, округление и далее перевод обратно в координаты канваса
-      node.position = {
-        x:
-          (Math.round((CANVAS_WINDOW_OPTIONS.min.x + this.currentMovingNodePosition.x / SCALE) / CANVAS_QUADRO_SIZE) * CANVAS_QUADRO_SIZE -
-            CANVAS_WINDOW_OPTIONS.min.x) *
-          SCALE,
-        y:
-          (Math.round((CANVAS_WINDOW_OPTIONS.min.y + this.currentMovingNodePosition.y / SCALE) / CANVAS_QUADRO_SIZE) * CANVAS_QUADRO_SIZE -
-            CANVAS_WINDOW_OPTIONS.min.y) *
-          SCALE,
-      };
-
-      nodesManager.moveNode(node);
-    } else if (this.state === ActionsState.default) {
-      // Выбор фигуры, на которой находится курсор, и если их несколько, то самая верхняя
-      const nodes = nodesManager.nodes.filter((fig) => fig.isPointInside({x: e.offsetX, y: e.offsetY}));
-      const node = nodes.sort((a, b) => b.zIndex - a.zIndex)?.[0];
-
-      if (node) {
-        const mousePos = {
-          x: e.offsetX - node.position.x,
-          y: e.offsetY - node.position.y,
-        };
-
-        const point = node.checkInsideConnectPoints(mousePos);
-
-        if (point) {
-          this.setHover(point);
-        } else if (!point) {
-          this.setHover(node);
-        }
-      } else {
-        this.resetHover();
+        break;
       }
 
-      if (this.hoverItem.prev !== this.hoverItem.current) canvasRenderer.draw();
-    } else if (this.state === ActionsState.creatingArrow) {
-      const point = arrowManager.startArrowPoint;
+      case ActionsState.movingNode: {
+        const node = this.movingNode;
+        const {x: curX, y: curY} = this.currentMovingNodePosition;
+        const {x: minX, y: minY} = CANVAS_WINDOW_OPTIONS.min;
 
-      if (!point) return;
+        if (!node) return;
 
-      arrowManager.drawTempArrow(e, point);
+        this.currentMovingNodePosition = {x: curX + e.movementX, y: curY + e.movementY};
+
+        // Перевод в абсолютные координаты, округление и далее перевод обратно в координаты канваса
+        node.position = {
+          x: (Math.round((minX + curX / SCALE) / CANVAS_QUADRO_SIZE) * CANVAS_QUADRO_SIZE - minX) * SCALE,
+          y: (Math.round((minY + curY / SCALE) / CANVAS_QUADRO_SIZE) * CANVAS_QUADRO_SIZE - minY) * SCALE,
+        };
+
+        nodesManager.moveNode(node);
+
+        break;
+      }
+
+      case ActionsState.default: {
+        // Выбор фигуры, на которой находится курсор, и если их несколько, то самая верхняя
+        const nodes = nodesManager.nodes.filter((fig) => fig.isPointInside({x: e.offsetX, y: e.offsetY}));
+        const node = nodes.sort((a, b) => b.zIndex - a.zIndex)?.[0];
+
+        if (node) {
+          const mousePos = {
+            x: e.offsetX - node.position.x,
+            y: e.offsetY - node.position.y,
+          };
+
+          const point = node.checkInsideConnectPoints(mousePos);
+
+          if (point) {
+            this.setHover(point);
+          } else if (!point) {
+            this.setHover(node);
+          }
+        } else {
+          this.resetHover();
+        }
+
+        if (this.hoverItem.prev !== this.hoverItem.current) canvasRenderer.draw();
+
+        break;
+      }
+
+      case ActionsState.creatingArrow: {
+        if (!arrowManager.startArrowPoint) return;
+
+        arrowManager.drawTempArrow(e, arrowManager.startArrowPoint);
+
+        break;
+      }
+      default: {
+        break;
+      }
     }
   }
 
@@ -142,22 +152,22 @@ export class CanvasController {
 
     if (arrowManager.startArrowPoint && arrowManager.finishArrowPoint && arrowManager.tempArrow) {
       arrowManager.addArrow(arrowManager.tempArrow);
-      arrowManager.tempArrow = undefined;
+      arrowManager.tempArrow = null;
     }
 
     if (this.movingNode) {
       this.redrawedCanvasAfterMovingNode = false;
     }
 
-    this.movingNode = undefined;
-    arrowManager.startArrowPoint = undefined;
-    arrowManager.finishArrowPoint = undefined;
+    this.movingNode = null;
+    arrowManager.startArrowPoint = null;
+    arrowManager.finishArrowPoint = null;
     canvasRenderer.draw();
   }
 
   public handleMouseLeave(): void {
     // this.state = ActionsState.default;
-    this.movingNode = undefined;
+    this.movingNode = null;
   }
 
   /** Обработка колёсика и тачпада (тут проблемное место) */
@@ -221,15 +231,13 @@ export class CanvasController {
   }
 
   public handleResize() {
-    const width = window.innerWidth - 150;
+    const width = window.innerWidth - SIDEBAR_WIDTH;
     const height = window.innerHeight;
+    const {height: htmlHeight, width: htmlWidth} = CANVAS_HTML_OPTIONS;
+    const {height: windowHeight, width: windowWidth} = CANVAS_WINDOW_OPTIONS;
 
-    const canvasInnerW =
-      width === CANVAS_HTML_OPTIONS.width ? CANVAS_WINDOW_OPTIONS.width : (CANVAS_WINDOW_OPTIONS.width * width) / CANVAS_HTML_OPTIONS.width;
-    const canvasInnerH =
-      width === CANVAS_HTML_OPTIONS.height
-        ? CANVAS_WINDOW_OPTIONS.height
-        : (CANVAS_WINDOW_OPTIONS.height * height) / CANVAS_HTML_OPTIONS.height;
+    const canvasInnerW = width === htmlWidth ? windowWidth : (windowWidth * width) / htmlWidth;
+    const canvasInnerH = width === htmlHeight ? windowHeight : (windowHeight * height) / htmlHeight;
 
     setCanvasWindowOptions({
       width: canvasInnerW,

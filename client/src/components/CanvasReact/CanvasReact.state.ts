@@ -1,5 +1,5 @@
-import {DEFAULT_CANVAS_SIZE} from './CanvasReact.constants';
-import {Point, Sizes} from './CanvasReact.types';
+import {Sizes, Point} from '@/types';
+import {DEFAULT_CANVAS_SIZE, SIDEBAR_WIDTH} from './CanvasReact.constants';
 
 const min = {x: DEFAULT_CANVAS_SIZE.width / 2, y: DEFAULT_CANVAS_SIZE.height / 2};
 const max = {x: DEFAULT_CANVAS_SIZE.width / 2, y: DEFAULT_CANVAS_SIZE.height / 2};
@@ -7,7 +7,7 @@ const max = {x: DEFAULT_CANVAS_SIZE.width / 2, y: DEFAULT_CANVAS_SIZE.height / 2
 /** Размер полотна в своей условной величине */
 export let FULL_CANVAS_SIZE = DEFAULT_CANVAS_SIZE;
 /** Размер полотна (видного пользователю) в пикселях */
-export let CANVAS_HTML_OPTIONS = {width: window.innerWidth - 150, height: window.innerHeight}; // 150 - это ширина сайдбара
+export let CANVAS_HTML_OPTIONS = {width: window.innerWidth - SIDEBAR_WIDTH, height: window.innerHeight};
 /** Размер полотна (видного пользователю) в своей условной величине и координаты */
 export let CANVAS_WINDOW_OPTIONS = {min, max, ...DEFAULT_CANVAS_SIZE};
 /** Масштаб */

@@ -1,4 +1,5 @@
-import {ConnectPoint} from './Node/ConnectPoint';
+import {Point} from '@/types';
+import {ConnectPoint} from './ConnectPoint';
 
 export enum ActionsState {
   default,
@@ -21,23 +22,11 @@ export enum ElementType {
   ConnectPoint,
 }
 
-export interface Sizes {
-  height: number;
-  width: number;
-}
-
-export interface Point {
-  x: number;
-  y: number;
-}
-
 export interface Arrow {
   from: ConnectPoint;
   to: ConnectPoint;
   path: Point[];
 }
-
-export type ConnectSide = 'top' | 'bottom' | 'left' | 'right';
 
 export type WithPrevState<T> = {
   prev: T | null;

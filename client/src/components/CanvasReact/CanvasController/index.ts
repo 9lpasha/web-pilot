@@ -182,6 +182,7 @@ export class CanvasController {
         setTimeout(handleTimeout, 10);
 
         const absDelta = Math.abs(e.deltaY);
+
         let calcDelta = absDelta <= 1 ? 1 : absDelta < 15 ? 15 : 30;
 
         if (calcDelta === 1) {
@@ -215,10 +216,11 @@ export class CanvasController {
           updateScale(1 / multiplier);
           this.manager.canvasRenderer.draw();
         } else {
-          const newFixScale = SCALE * (1 / multiplier) < 0.05 ? 0.05 : 10;
-          updateScale(newFixScale / SCALE);
-
-          if (SCALE !== 0.05 && SCALE !== 10) this.manager.canvasRenderer.draw();
+          // TODO тут баг (после скейлинга у граничных значений начинается некорректный скейлинг)
+          // const newFixScale = SCALE * (1 / multiplier) < 0.05 ? 0.05 : 10;
+          // console.log(newFixScale, SCALE);
+          // updateScale(newFixScale / SCALE);
+          // if (SCALE !== 0.05 && SCALE !== 10) this.manager.canvasRenderer.draw();
         }
       }
     } else {

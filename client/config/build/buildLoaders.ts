@@ -6,15 +6,6 @@ import ReactRefreshTypeScript from 'react-refresh-typescript';
 export const buildLoaders = (options: WebpackOptions): ModuleOptions['rules'] => {
   const {isDev} = options;
 
-  const cssLoaderWithModules = {
-    loader: 'css-loader',
-    options: {
-      modules: {
-        localIdentName: isDev ? '[path][name]__[local]' : '[hash:base64:8]',
-      },
-    },
-  };
-
   const tsLoader = {
     loader: 'ts-loader',
     options: {
@@ -33,7 +24,7 @@ export const buildLoaders = (options: WebpackOptions): ModuleOptions['rules'] =>
     },
     {
       test: /\.css$/i,
-      use: [isDev ? 'style-loader' : MiniCssExtractPlugin.loader, cssLoaderWithModules],
+      use: [isDev ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader'],
     },
     {
       test: /\.(png|jpg|jpeg|gif)$/i,

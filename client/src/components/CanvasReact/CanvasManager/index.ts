@@ -3,7 +3,15 @@ import {CanvasController} from '../CanvasController';
 import {DEFAULT_CANVAS_SIZE, SIDEBAR_WIDTH} from '../CanvasReact.constants';
 import {SCALE, setCanvasHtmlOptions, setCanvasWindowOptions, setFullCanvasSize, updateScale} from '../CanvasReact.state';
 import {CanvasRenderer} from '../CanvasRenderer';
+import {Node} from '../Node';
 import {NodesManager} from '../NodesManager';
+
+interface CreateCanvasManager {
+  canvas: HTMLCanvasElement;
+  canvasBack: HTMLCanvasElement;
+  canvasTemp: HTMLCanvasElement;
+  returnNode: (node: Node) => void;
+}
 
 /** Главный класс полотна */
 export class CanvasManager {
@@ -16,13 +24,13 @@ export class CanvasManager {
   /** управляет пользовательскими действиями */
   public canvasController: CanvasController;
 
-  constructor(canvas: HTMLCanvasElement, canvasBack: HTMLCanvasElement, canvasTemp: HTMLCanvasElement) {
+  constructor({canvas, canvasBack, canvasTemp, returnNode}: CreateCanvasManager) {
     const ctx = canvas.getContext('2d')!;
     const ctxBack = canvasBack.getContext('2d')!;
     const ctxTemp = canvasTemp.getContext('2d')!;
     this.canvasRenderer = new CanvasRenderer(this, ctx, ctxBack, canvas, ctxTemp);
 
-    this.nodesManager = new NodesManager(this);
+    this.nodesManager = new NodesManager(this, returnNode);
 
     this.canvasController = new CanvasController(this);
 

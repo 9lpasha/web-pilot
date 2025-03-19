@@ -10,9 +10,12 @@ import {Point} from '@/types';
 export class NodesManager {
   public nodes: Node[] = [];
 
-  constructor(private manager: CanvasManager) {}
+  constructor(
+    private manager: CanvasManager,
+    public returnNode: (node: Node) => void,
+  ) {}
 
-  public addNode(type: NodeType, tagName?: keyof HTMLElementTagNameMap) {
+  public addNode(type: NodeType, id: string, tagName?: keyof HTMLElementTagNameMap) {
     // Создание позиции по сетке ближе к центру экрана
     const position = {
       x:
@@ -30,6 +33,7 @@ export class NodesManager {
       position,
       manager: this.manager,
       zIndex: this.nodes.length,
+      id,
     });
 
     this.nodes.push(node);
@@ -162,5 +166,10 @@ export class NodesManager {
     }
 
     canvasRenderer.drawMovingNode();
+  }
+
+  /** Удаление ноды с полотна */
+  public deleteNode(node: Node) {
+    this.manager.nodesManager.nodes = this.manager.nodesManager.nodes.filter((el) => el !== node);
   }
 }

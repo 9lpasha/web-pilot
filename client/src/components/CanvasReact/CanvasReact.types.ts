@@ -20,6 +20,7 @@ export enum NodeType {
 export enum ElementType {
   Node,
   ConnectPoint,
+  Cross,
 }
 
 export interface Arrow {
@@ -32,3 +33,9 @@ export type WithPrevState<T> = {
   prev: T | null;
   current: T | null;
 };
+
+export interface NodeUI {
+  id: string;
+  type: NodeType;
+  name?: string;
+}

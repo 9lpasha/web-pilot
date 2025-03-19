@@ -1,7 +1,8 @@
 import {Sizes} from '@/types';
+import {NodeType, NodeUI} from './CanvasReact.types';
 
 export const DEFAULT_CANVAS_SIZE: Sizes = {height: 9000, width: 16000};
-export const SIDEBAR_WIDTH = 150;
+export const SIDEBAR_WIDTH = 250;
 
 export const DEFAULT_NODE_SIZE = {
   width: 300,
@@ -28,6 +29,11 @@ export const DEFAULT_NODE_SIZE = {
     y: 125,
     radius: 15,
   },
+  topRightPos: {
+    x: 275,
+    y: 25,
+    radius: 15,
+  },
   text: {
     x: 150,
     y: 80,
@@ -45,3 +51,8 @@ export enum POINT_COLORS {
   STROKE_RED_ALPHA = 'rgba(255, 0, 0, 0.3)',
   STROKE_GREEN_ALPHA = 'rgba(0, 255, 0, 0.3)',
 }
+
+export const fakeNodes: NodeUI[] = [
+  {id: '1', type: NodeType.htmlElement, name: 'div'},
+  {id: '2', type: NodeType.htmlElement, name: 'button'},
+];

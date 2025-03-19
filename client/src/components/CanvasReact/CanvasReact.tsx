@@ -1,7 +1,9 @@
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {CanvasManager} from './CanvasManager';
-import {NodeType} from './CanvasReact.types';
-import {SIDEBAR_WIDTH} from './CanvasReact.constants';
+import {fakeNodes} from './CanvasReact.constants';
+import {Sidebar} from './Sidebar';
+import {NodeUI} from './CanvasReact.types';
+import {Node} from './Node';
 
 export const CanvasReact = () => {
   const [canvasManager, setCanvasManager] = useState<CanvasManager>();
@@ -9,24 +11,36 @@ export const CanvasReact = () => {
   const canvasBackRef = useRef<HTMLCanvasElement>(null);
   const canvasTempRef = useRef<HTMLCanvasElement>(null);
 
+  const [sidebarNodes, setSidebarNodes] = useState(fakeNodes);
+
   useEffect(() => {
     if (!canvasRef.current || !canvasBackRef.current || !canvasTempRef.current) return;
 
-    const manager = new CanvasManager(canvasRef.current, canvasBackRef.current, canvasTempRef.current);
+    const addNode = (node: Node) => {
+      setSidebarNodes((prev) => [...prev, {id: node.id, type: node.type, name: node.tagName}]);
+    };
+
+    const manager = new CanvasManager({
+      canvas: canvasRef.current,
+      canvasBack: canvasBackRef.current,
+      canvasTemp: canvasTempRef.current,
+      returnNode: addNode,
+    });
 
     setCanvasManager(manager);
-  }, []);
+  }, [setSidebarNodes, setCanvasManager]);
+
+  const onClickHtmlNode = useCallback(
+    (node: NodeUI) => {
+      canvasManager?.nodesManager.addNode(node.type, node.id, node.name as keyof HTMLElementTagNameMap | undefined);
+      setSidebarNodes(sidebarNodes.filter((el) => node.id !== el.id));
+    },
+    [canvasManager?.nodesManager, sidebarNodes],
+  );
 
   return (
     <div style={{width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex'}}>
-      <div style={{display: 'flex', flexDirection: 'column', gap: '10px', minWidth: SIDEBAR_WIDTH, height: '100dvh'}}>
-        <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.htmlElement, 'div')}>Add div</button>
-        <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.htmlElement, 'button')}>Add button</button>
-        <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.style)}>Add styles</button>
-        <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.variable)}>Add variable</button>
-        <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.event)}>Add Event</button>
-        <button onClick={() => canvasManager?.nodesManager.addNode(NodeType.function)}>Add function</button>
-      </div>
+      <Sidebar htmlNodes={sidebarNodes} onClickHtmlNode={onClickHtmlNode} />
 
       <div style={{position: 'relative'}}>
         <canvas

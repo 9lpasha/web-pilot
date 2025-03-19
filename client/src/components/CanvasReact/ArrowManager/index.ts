@@ -3,6 +3,7 @@ import {Sizes, Point} from '@/types';
 import {Arrow} from '../CanvasReact.types';
 import {ConnectPoint} from '../ConnectPoint';
 import {CanvasManager} from '../CanvasManager';
+import {Node} from '../Node';
 
 /** Класс для соединения фигур стрелками */
 export class ArrowManager {
@@ -81,5 +82,16 @@ export class ArrowManager {
     if (this.startArrowPoint && this.finishArrowPoint) {
       this.tempArrow = {from: this.startArrowPoint, to: this.finishArrowPoint, path};
     }
+  }
+
+  /** Удаление стрелок, принадлежащих ноде */
+  public deleteArrowsOfNode(node: Node) {
+    this.arrows
+      .filter((el) => node === el.from.node || node === el.to.node)
+      .forEach((el) => {
+        el.from.connected = false;
+        el.to.connected = false;
+      });
+    this.arrows = this.arrows.filter((el) => node !== el.from.node && node !== el.to.node);
   }
 }

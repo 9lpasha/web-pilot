@@ -8,9 +8,10 @@ import {
   setCanvasWindowOptions,
   updateScale,
 } from '../CanvasReact.state';
-import {ActionsState, ElementType, WithPrevState} from '../CanvasReact.types';
+import {ActionsState, ElementType, NodeType, WithPrevState} from '../CanvasReact.types';
 import {Node} from '../Node';
 import {ConnectPoint} from '../ConnectPoint';
+import {Cross} from '../Cross';
 
 export class CanvasController {
   /** Состояние канваса */
@@ -26,13 +27,13 @@ export class CanvasController {
   /** Состояние для оптимизации перетаскивания ноды */
   public redrawedCanvasAfterMovingNode = false;
   /** Нода или точка перетаскивания в состоянии hover */
-  public hoverItem: WithPrevState<ConnectPoint | Node> = {prev: null, current: null};
+  public hoverItem: WithPrevState<ConnectPoint | Node | Cross> = {prev: null, current: null};
   /** Перетаскиваемая нода */
   public movingNode: null | Node = null;
 
   constructor(private manager: CanvasManager) {}
 
-  private setHover(item: Node | ConnectPoint | null) {
+  private setHover(item: Node | ConnectPoint | Cross | null) {
     this.hoverItem = {prev: this.hoverItem.current, current: item};
   }
 
@@ -71,6 +72,13 @@ export class CanvasController {
           this.state = ActionsState.creatingArrow;
           this.resetHover();
         }
+      }
+
+      if (hovered?.elementType === ElementType.Cross && 'node' in hovered) {
+        if (hovered.node.type === NodeType.htmlElement) this.manager.nodesManager.returnNode(hovered.node);
+        hovered.node.destroy();
+
+        this.state = ActionsState.default;
       }
     }
   }
@@ -117,11 +125,16 @@ export class CanvasController {
           };
 
           const point = node.checkInsideConnectPoints(mousePos);
+          const cross = node.checkInsideCross(mousePos);
 
           if (point) {
             this.setHover(point);
           } else if (!point) {
             this.setHover(node);
+          }
+
+          if (cross) {
+            this.setHover(cross);
           }
         } else {
           this.resetHover();

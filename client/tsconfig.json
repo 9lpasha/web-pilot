@@ -21,17 +21,12 @@
       "@entities/*": ["src/entities/*"],
       "@shared/*": ["src/shared/*"],
       "~shared": ["../shared"]
-    },
+    }
   },
   "ts-node": {
     "compilerOptions": {
       "module": "CommonJS"
     }
   },
-  "include": [
-    "./global.d.ts",
-    "./src/**/*.ts",
-    "./src/**/*.tsx",
-    "./config/**/*.ts"
-  ]
+  "include": ["./global.d.ts", "./src/**/*.ts", "./src/**/*.tsx", "./config/**/*.ts", "src/shared/constants"]
 }

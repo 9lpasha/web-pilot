@@ -1,6 +1,7 @@
-import {ResolveOptions} from 'webpack';
-import {WebpackOptions} from './types';
 import {resolve} from 'path';
+import {ResolveOptions} from 'webpack';
+
+import {WebpackOptions} from './types';
 
 export const buildResolvers = (options: WebpackOptions): ResolveOptions => {
   const {paths} = options;

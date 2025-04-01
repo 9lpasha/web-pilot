@@ -1,2 +1,19 @@
-/* stylelint-disable-next-line import-notation */
 @import 'tailwindcss';
+
+.ant-tree {
+  background: unset;
+}
+
+.ant-tree-node-content-wrapper {
+  background: white !important;
+}
+
+.ant-tree-switcher-icon svg {
+  fill: white;
+}
+
+.ant-tree-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

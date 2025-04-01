@@ -1,5 +1,6 @@
 import {resolve} from 'path';
 import {Configuration} from 'webpack';
+
 import {buildWebpack, WebpackEnvs, WebpackOptions, WebpackPaths} from './config';
 import 'webpack-dev-server';
 

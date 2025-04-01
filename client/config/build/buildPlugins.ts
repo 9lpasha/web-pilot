@@ -1,11 +1,13 @@
-import {DefinePlugin, ProgressPlugin, WebpackPluginInstance} from 'webpack';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer';
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
-import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
-import {AppEnvironment, AppEnvs, WebpackOptions} from './types';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import {resolve} from 'path';
+import {DefinePlugin, ProgressPlugin, WebpackPluginInstance} from 'webpack';
+import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer';
+
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+
+import {AppEnvironment, AppEnvs, WebpackOptions} from './types';
 
 export const buildPlugins = (options: WebpackOptions): WebpackPluginInstance[] => {
   const {isDev, isProd, environment, isBundleAnalyzer, paths} = options;

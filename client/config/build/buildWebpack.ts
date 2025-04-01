@@ -1,7 +1,8 @@
 import {Configuration} from 'webpack';
-import {buildPlugins} from './buildPlugins';
+
 import {buildDevServer} from './buildDevServer';
 import {buildLoaders} from './buildLoaders';
+import {buildPlugins} from './buildPlugins';
 import {buildResolvers} from './buildResolvers';
 import {WebpackOptions} from './types';
 

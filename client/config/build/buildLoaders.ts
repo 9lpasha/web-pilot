@@ -1,7 +1,8 @@
-import {ModuleOptions} from 'webpack';
-import {WebpackOptions} from './types';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import ReactRefreshTypeScript from 'react-refresh-typescript';
+import {ModuleOptions} from 'webpack';
+
+import {WebpackOptions} from './types';
 
 export const buildLoaders = (options: WebpackOptions): ModuleOptions['rules'] => {
   const {isDev} = options;

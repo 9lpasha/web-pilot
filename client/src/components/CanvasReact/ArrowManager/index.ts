@@ -1,9 +1,10 @@
-import {drawTempConnectArrow} from '@/helpers';
-import {Sizes, Point} from '@/types';
+import {drawTempConnectArrow} from '@/shared/lib';
+import {Sizes, Point} from '@/shared/types';
+
+import {CanvasManager} from '../CanvasManager';
+import {CanvasNode} from '../CanvasNode';
 import {Arrow} from '../CanvasReact.types';
 import {ConnectPoint} from '../ConnectPoint';
-import {CanvasManager} from '../CanvasManager';
-import {Node} from '../Node';
 
 /** Класс для соединения фигур стрелками */
 export class ArrowManager {
@@ -85,7 +86,7 @@ export class ArrowManager {
   }
 
   /** Удаление стрелок, принадлежащих ноде */
-  public deleteArrowsOfNode(node: Node) {
+  public deleteArrowsOfNode(node: CanvasNode) {
     this.arrows
       .filter((el) => node === el.from.node || node === el.to.node)
       .forEach((el) => {

@@ -1,14 +1,15 @@
-import {drawConnectArrow, drawGrid} from '@/helpers';
+import {drawConnectArrow, drawGrid} from '@/shared/lib';
+
 import {CanvasManager} from '../CanvasManager';
 
 /** Класс для отрисовки полотна */
 export class CanvasRenderer {
   constructor(
     private manager: CanvasManager,
-    private ctx: CanvasRenderingContext2D,
-    private ctxBack: CanvasRenderingContext2D,
-    private canvas: HTMLCanvasElement,
+    public ctx: CanvasRenderingContext2D,
+    public ctxBack: CanvasRenderingContext2D,
     public ctxTemp: CanvasRenderingContext2D,
+    private canvas: HTMLCanvasElement,
   ) {}
 
   /** Отрисовка всех фигур и стрелок */

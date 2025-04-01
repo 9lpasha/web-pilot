@@ -1,17 +1,22 @@
-import {CanvasManager} from '../CanvasManager';
-import {CANVAS_QUADRO_SIZE, SIDEBAR_WIDTH} from '../CanvasReact.constants';
+import {SIDEBAR_WIDTH, CANVAS_QUADRO_SIZE} from '@/shared/constants';
 import {
-  CANVAS_HTML_OPTIONS,
-  CANVAS_WINDOW_OPTIONS,
-  SCALE,
+  CanvasHtmlOptions,
+  CanvasWindowOptions,
+  Scale,
   setCanvasHtmlOptions,
   setCanvasWindowOptions,
-  updateScale,
-} from '../CanvasReact.state';
-import {ActionsState, ElementType, NodeType, WithPrevState} from '../CanvasReact.types';
-import {Node} from '../Node';
+  setScale,
+} from '@shared/globalCanvasState';
+
+import {CanvasManager} from '../CanvasManager';
+import {CanvasNode} from '../CanvasNode';
+import {ActionsState, ElementType, ReactStoreForCanvas, WithPrevState} from '../CanvasReact.types';
 import {ConnectPoint} from '../ConnectPoint';
 import {Cross} from '../Cross';
+import {FunctionLink} from '../FunctionLink';
+import {NodePropsButton} from '../NodePropsButton';
+
+type HoverItemType = CanvasNode | ConnectPoint | Cross | NodePropsButton | FunctionLink;
 
 export class CanvasController {
   /** Состояние канваса */
@@ -27,13 +32,13 @@ export class CanvasController {
   /** Состояние для оптимизации перетаскивания ноды */
   public redrawedCanvasAfterMovingNode = false;
   /** Нода или точка перетаскивания в состоянии hover */
-  public hoverItem: WithPrevState<ConnectPoint | Node | Cross> = {prev: null, current: null};
+  public hoverItem: WithPrevState<HoverItemType> = {prev: null, current: null};
   /** Перетаскиваемая нода */
-  public movingNode: null | Node = null;
+  public movingNode: null | CanvasNode = null;
 
   constructor(private manager: CanvasManager) {}
 
-  private setHover(item: Node | ConnectPoint | Cross | null) {
+  private setHover(item: HoverItemType | null) {
     this.hoverItem = {prev: this.hoverItem.current, current: item};
   }
 
@@ -43,10 +48,10 @@ export class CanvasController {
 
   /** Перемещение фоновой сетки и всех нод */
   private moveCanvas(x: number, y: number) {
-    CANVAS_WINDOW_OPTIONS.min.x += x / SCALE;
-    CANVAS_WINDOW_OPTIONS.min.y += y / SCALE;
-    CANVAS_WINDOW_OPTIONS.max.x += x / SCALE;
-    CANVAS_WINDOW_OPTIONS.max.y += y / SCALE;
+    CanvasWindowOptions.min.x += x / Scale;
+    CanvasWindowOptions.min.y += y / Scale;
+    CanvasWindowOptions.max.x += x / Scale;
+    CanvasWindowOptions.max.y += y / Scale;
 
     this.isChangedSizePosition = true;
 
@@ -62,29 +67,20 @@ export class CanvasController {
 
       if (hovered) {
         if (hovered.elementType === ElementType.Node) {
-          this.movingNode = hovered as Node;
+          this.movingNode = hovered as CanvasNode;
           this.state = ActionsState.movingNode;
-          this.resetHover();
 
           this.currentMovingNodePosition = {...hovered.position};
-        } else {
+        } else if (hovered.elementType === ElementType.ConnectPoint) {
           this.manager.arrowManager.startArrowPoint = hovered as ConnectPoint;
           this.state = ActionsState.creatingArrow;
-          this.resetHover();
         }
-      }
-
-      if (hovered?.elementType === ElementType.Cross && 'node' in hovered) {
-        if (hovered.node.type === NodeType.htmlElement) this.manager.nodesManager.returnNode(hovered.node);
-        hovered.node.destroy();
-
-        this.state = ActionsState.default;
       }
     }
   }
 
   public handleMouseMove(e: MouseEvent): void {
-    const {nodesManager, canvasRenderer, arrowManager} = this.manager;
+    const {nodesManager, canvasRenderer, arrowManager, canvasController} = this.manager;
 
     switch (this.state) {
       case ActionsState.movingCanvas: {
@@ -96,7 +92,7 @@ export class CanvasController {
       case ActionsState.movingNode: {
         const node = this.movingNode;
         const {x: curX, y: curY} = this.currentMovingNodePosition;
-        const {x: minX, y: minY} = CANVAS_WINDOW_OPTIONS.min;
+        const {x: minX, y: minY} = CanvasWindowOptions.min;
 
         if (!node) return;
 
@@ -104,11 +100,13 @@ export class CanvasController {
 
         // Перевод в абсолютные координаты, округление и далее перевод обратно в координаты канваса
         node.position = {
-          x: (Math.round((minX + curX / SCALE) / CANVAS_QUADRO_SIZE) * CANVAS_QUADRO_SIZE - minX) * SCALE,
-          y: (Math.round((minY + curY / SCALE) / CANVAS_QUADRO_SIZE) * CANVAS_QUADRO_SIZE - minY) * SCALE,
+          x: (Math.round((minX + curX / Scale) / CANVAS_QUADRO_SIZE) * CANVAS_QUADRO_SIZE - minX) * Scale,
+          y: (Math.round((minY + curY / Scale) / CANVAS_QUADRO_SIZE) * CANVAS_QUADRO_SIZE - minY) * Scale,
         };
 
         nodesManager.moveNode(node);
+
+        if (canvasController.hoverItem) this.resetHover();
 
         break;
       }
@@ -126,6 +124,8 @@ export class CanvasController {
 
           const point = node.checkInsideConnectPoints(mousePos);
           const cross = node.checkInsideCross(mousePos);
+          const propsButton = node.checkInsidePropsButton(mousePos);
+          const functionLink = node.checkInsideFunctionLink(mousePos);
 
           if (point) {
             this.setHover(point);
@@ -135,6 +135,10 @@ export class CanvasController {
 
           if (cross) {
             this.setHover(cross);
+          } else if (propsButton) {
+            this.setHover(propsButton);
+          } else if (functionLink) {
+            this.setHover(functionLink);
           }
         } else {
           this.resetHover();
@@ -149,6 +153,8 @@ export class CanvasController {
         if (!arrowManager.startArrowPoint) return;
 
         arrowManager.drawTempArrow(e, arrowManager.startArrowPoint);
+
+        if (canvasController.hoverItem) this.resetHover();
 
         break;
       }
@@ -176,6 +182,25 @@ export class CanvasController {
     arrowManager.startArrowPoint = null;
     arrowManager.finishArrowPoint = null;
     canvasRenderer.draw();
+  }
+
+  public handleClick(e: MouseEvent, reactStore: ReactStoreForCanvas): void {
+    const hovered = this.hoverItem.current;
+
+    if (hovered?.elementType === ElementType.Cross && 'node' in hovered) {
+      hovered.node.destroy();
+
+      this.state = ActionsState.default;
+      this.manager.canvasRenderer.draw();
+    } else if (hovered?.elementType === ElementType.NodePropsButton && 'node' in hovered) {
+      reactStore.openModal();
+
+      this.state = ActionsState.default;
+      this.resetHover();
+      this.manager.canvasRenderer.draw();
+    } else if (hovered?.elementType === ElementType.FunctionLink && 'node' in hovered) {
+      hovered?.node.navigate(e);
+    }
   }
 
   public handleMouseLeave(): void {
@@ -210,15 +235,15 @@ export class CanvasController {
         const numerator = e.deltaY > 0 ? Math.abs(calcChange) : 0;
         const denomerator = e.deltaY < 0 ? Math.abs(calcChange) : 0;
         const multiplier = (1 + numerator) / (1 + denomerator);
-        const newWidth = CANVAS_WINDOW_OPTIONS.width * multiplier;
-        const newHeight = CANVAS_WINDOW_OPTIONS.height * multiplier;
+        const newWidth = CanvasWindowOptions.width * multiplier;
+        const newHeight = CanvasWindowOptions.height * multiplier;
         const min = {
-          x: CANVAS_WINDOW_OPTIONS.min.x + (1 - multiplier) * CANVAS_WINDOW_OPTIONS.width * (e.offsetX / CANVAS_HTML_OPTIONS.width),
-          y: CANVAS_WINDOW_OPTIONS.min.y + (1 - multiplier) * CANVAS_WINDOW_OPTIONS.height * (e.offsetY / CANVAS_HTML_OPTIONS.height),
+          x: CanvasWindowOptions.min.x + (1 - multiplier) * CanvasWindowOptions.width * (e.offsetX / CanvasHtmlOptions.width),
+          y: CanvasWindowOptions.min.y + (1 - multiplier) * CanvasWindowOptions.height * (e.offsetY / CanvasHtmlOptions.height),
         };
 
         // проверка на граничные значения
-        const isNiceNewScale = SCALE * (1 / multiplier) >= 0.05 && SCALE * (1 / multiplier) <= 10;
+        const isNiceNewScale = Scale * (1 / multiplier) >= 0.05 && Scale * (1 / multiplier) <= 10;
         if (isNiceNewScale) {
           setCanvasWindowOptions({
             width: newWidth,
@@ -226,7 +251,7 @@ export class CanvasController {
             min,
             max: {x: min.x + newWidth, y: min.y + newHeight},
           });
-          updateScale(1 / multiplier);
+          setScale(1 / multiplier);
           this.manager.canvasRenderer.draw();
         } else {
           // TODO тут баг (после скейлинга у граничных значений начинается некорректный скейлинг)
@@ -248,8 +273,8 @@ export class CanvasController {
   public handleResize() {
     const width = window.innerWidth - SIDEBAR_WIDTH;
     const height = window.innerHeight;
-    const {height: htmlHeight, width: htmlWidth} = CANVAS_HTML_OPTIONS;
-    const {height: windowHeight, width: windowWidth} = CANVAS_WINDOW_OPTIONS;
+    const {height: htmlHeight, width: htmlWidth} = CanvasHtmlOptions;
+    const {height: windowHeight, width: windowWidth} = CanvasWindowOptions;
 
     const canvasInnerW = width === htmlWidth ? windowWidth : (windowWidth * width) / htmlWidth;
     const canvasInnerH = width === htmlHeight ? windowHeight : (windowHeight * height) / htmlHeight;
@@ -257,8 +282,8 @@ export class CanvasController {
     setCanvasWindowOptions({
       width: canvasInnerW,
       height: canvasInnerH,
-      min: CANVAS_WINDOW_OPTIONS.min,
-      max: {x: CANVAS_WINDOW_OPTIONS.min.x + canvasInnerW, y: CANVAS_WINDOW_OPTIONS.min.y + canvasInnerH},
+      min: CanvasWindowOptions.min,
+      max: {x: CanvasWindowOptions.min.x + canvasInnerW, y: CanvasWindowOptions.min.y + canvasInnerH},
     });
     setCanvasHtmlOptions({width, height});
   }

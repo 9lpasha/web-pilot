@@ -1,39 +1,41 @@
-import {drawTempConnectArrow} from '@/helpers';
+import {NodeType} from '@/shared/enums';
+import {drawTempConnectArrow} from '@/shared/lib';
+import {CanvasNodeStore, Point} from '@/shared/types';
+import {CANVAS_QUADRO_SIZE, DEFAULT_NODE_SIZE} from '@shared/constants';
+import {CanvasWindowOptions} from '@shared/globalCanvasState';
+
 import {CanvasManager} from '../CanvasManager';
-import {CANVAS_QUADRO_SIZE, DEFAULT_NODE_SIZE} from '../CanvasReact.constants';
-import {CANVAS_WINDOW_OPTIONS} from '../CanvasReact.state';
-import {Arrow, NodeType} from '../CanvasReact.types';
-import {Node} from '../Node';
-import {Point} from '@/types';
+import {CanvasNode} from '../CanvasNode';
+import {Arrow, ReactStoreForCanvas} from '../CanvasReact.types';
 
 /** Класс для управления нодами */
 export class NodesManager {
-  public nodes: Node[] = [];
+  private manager: CanvasManager;
+  public nodes: CanvasNode[];
+  public reactStore: ReactStoreForCanvas;
 
-  constructor(
-    private manager: CanvasManager,
-    public returnNode: (node: Node) => void,
-  ) {}
+  constructor(manager: CanvasManager, nodes: CanvasNodeStore[] = [], reactStore: ReactStoreForCanvas) {
+    this.manager = manager;
+    this.nodes = nodes.map((n) => new CanvasNode({...n, manager}));
+    this.reactStore = reactStore;
+  }
 
-  public addNode(type: NodeType, id: string, tagName?: keyof HTMLElementTagNameMap) {
+  public addNode(type: NodeType, id: string, tagName?: keyof HTMLElementTagNameMap, navigateLink?: string) {
+    const {height, width} = DEFAULT_NODE_SIZE;
     // Создание позиции по сетке ближе к центру экрана
     const position = {
-      x:
-        Math.round((CANVAS_WINDOW_OPTIONS.min.x + CANVAS_WINDOW_OPTIONS.width / 2 - DEFAULT_NODE_SIZE.width / 2) / CANVAS_QUADRO_SIZE) *
-        CANVAS_QUADRO_SIZE,
-      y:
-        Math.round((CANVAS_WINDOW_OPTIONS.min.y + CANVAS_WINDOW_OPTIONS.height / 2 - DEFAULT_NODE_SIZE.height / 2) / CANVAS_QUADRO_SIZE) *
-        CANVAS_QUADRO_SIZE,
+      x: Math.round((CanvasWindowOptions.min.x + CanvasWindowOptions.width / 2 - width / 2) / CANVAS_QUADRO_SIZE) * CANVAS_QUADRO_SIZE,
+      y: Math.round((CanvasWindowOptions.min.y + CanvasWindowOptions.height / 2 - height / 2) / CANVAS_QUADRO_SIZE) * CANVAS_QUADRO_SIZE,
     };
-    const node = new Node({
-      height: DEFAULT_NODE_SIZE.height,
-      width: DEFAULT_NODE_SIZE.width,
+    const node = new CanvasNode({
+      size: {height, width},
       type,
       tagName,
       position,
       manager: this.manager,
       zIndex: this.nodes.length,
       id,
+      navigateLink,
     });
 
     this.nodes.push(node);
@@ -60,7 +62,7 @@ export class NodesManager {
   }
 
   /** Перемещение ноды */
-  public moveNode(node: Node) {
+  public moveNode(node: CanvasNode) {
     const {arrowManager, canvasRenderer} = this.manager;
 
     if (node.connectPoints.top.connected) {
@@ -169,7 +171,7 @@ export class NodesManager {
   }
 
   /** Удаление ноды с полотна */
-  public deleteNode(node: Node) {
+  public deleteNode(node: CanvasNode) {
     this.manager.nodesManager.nodes = this.manager.nodesManager.nodes.filter((el) => el !== node);
   }
 }

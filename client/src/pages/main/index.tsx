@@ -69,21 +69,33 @@ export const MainPage = () => {
       if (obj) obj.disabled = true;
 
       setSidebarNodes(tempNodes);
-      canvasManager?.nodesManager.addNode(node.type, node.id, node.name as keyof HTMLElementTagNameMap | undefined);
+      canvasManager?.nodesManager.addNode(node.type, node.id, node.name, {tagName: node.name as keyof HTMLElementTagNameMap});
     },
     [canvasManager?.nodesManager, sidebarNodes],
   );
 
-  const onClickNode = useCallback(
+  const onClickFunction = useCallback(
+    (node: NodeUI & {navigateLink: string}) => {
+      canvasManager?.nodesManager.addNode(node.type, node.id, node.name, {navigateLink: node.navigateLink});
+    },
+    [canvasManager?.nodesManager],
+  );
+
+  const onClickEvent = useCallback(
     (node: NodeUI) => {
-      canvasManager?.nodesManager.addNode(node.type, node.id, node.name as keyof HTMLElementTagNameMap | undefined, node.navigateLink);
+      canvasManager?.nodesManager.addNode(node.type, node.id, node.name);
     },
     [canvasManager?.nodesManager],
   );
 
   return (
     <div style={{width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex'}}>
-      <MainSidebar htmlNodes={sidebarNodes} onClickHtmlNode={onClickHtmlNode} onClickNode={onClickNode} />
+      <MainSidebar
+        htmlNodes={sidebarNodes}
+        onClickHtmlNode={onClickHtmlNode}
+        onClickEvent={onClickEvent}
+        onClickFunction={onClickFunction}
+      />
 
       <div style={{position: 'relative'}}>
         <canvas

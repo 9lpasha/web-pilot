@@ -321,13 +321,14 @@ export const drawTempConnectArrow = ({
   side,
   finishSide,
   nodeFinishParams,
-}: ConnectArrowParams): Point[] => {
+  color,
+}: ConnectArrowParams & {color?: string}): Point[] => {
   const path = getArrowPath({startX, startY, endX, endY, nodeParams, side, finishSide, nodeFinishParams});
   const arrowHeight = 12 * Scale;
 
   // Настройка цвета заливки и обводки
-  ctx.fillStyle = 'black';
-  ctx.strokeStyle = 'black';
+  ctx.fillStyle = color || 'black';
+  ctx.strokeStyle = color || 'black';
   ctx.lineWidth = 3 * Scale;
 
   // Рисуем основную линию стрелки

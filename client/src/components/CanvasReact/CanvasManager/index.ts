@@ -14,6 +14,8 @@ import {
 
 import {ArrowManager} from '../ArrowManager';
 import {CanvasController} from '../CanvasController';
+import {CanvasNode} from '../CanvasNode';
+import {isFunctionCanvasNode, isHtmlCanvasNode, isVariableCanvasNode} from '../CanvasNode/CanvasNode.helpers';
 import {ReactStoreForCanvas} from '../CanvasReact.types';
 import {CanvasRenderer} from '../CanvasRenderer';
 import {NodesManager} from '../NodesManager';
@@ -22,8 +24,8 @@ interface CreateCanvasManager {
   canvas: HTMLCanvasElement;
   canvasBack: HTMLCanvasElement;
   canvasTemp: HTMLCanvasElement;
-  initialNodes: CanvasNodeStore[];
   reactStore: ReactStoreForCanvas;
+  initialNodes: CanvasNodeStore[];
   initialGlobalCanvasInfo: GlobalCanvasInfo | undefined;
 }
 
@@ -41,7 +43,7 @@ export class CanvasManager {
   /** управляет пользовательскими действиями */
   public reactStore: ReactStoreForCanvas;
 
-  constructor({canvas, canvasBack, canvasTemp, initialNodes, initialGlobalCanvasInfo, reactStore}: CreateCanvasManager) {
+  constructor({canvas, canvasBack, canvasTemp, reactStore, initialNodes, initialGlobalCanvasInfo}: CreateCanvasManager) {
     const ctx = canvas.getContext('2d')!;
     const ctxBack = canvasBack.getContext('2d')!;
     const ctxTemp = canvasTemp.getContext('2d')!;
@@ -60,6 +62,22 @@ export class CanvasManager {
     this.canvasController = new CanvasController(this);
 
     this.arrowManager = new ArrowManager(this);
+
+    initialNodes.forEach((n) => {
+      n.arrows.forEach((a) => {
+        const nodeFrom = this.nodesManager.nodes.find((n) => n.id === a.from.nodeId) as CanvasNode;
+        const nodeTo = this.nodesManager.nodes.find((n) => n.id === a.to.nodeId) as CanvasNode;
+
+        nodeFrom.connectPoints[a.from.side].connected = true;
+        nodeTo.connectPoints[a.to.side].connected = true;
+
+        nodeFrom.addArrow({
+          path: a.path,
+          from: nodeFrom.connectPoints[a.from.side],
+          to: nodeTo.connectPoints[a.to.side],
+        });
+      });
+    });
 
     const canvasInnerW = window.innerWidth - SIDEBAR_WIDTH;
     const canvasInnerH = window.innerHeight;
@@ -134,9 +152,22 @@ export class CanvasManager {
   sync() {
     this.reactStore.saveCanvasNodes(
       this.nodesManager.nodes.map((el) => {
-        const {tagName, zIndex, type, realPosition, id, elementType, realSize, navigateLink} = el;
+        const {name, zIndex, type, realPosition, id, realSize, arrows} = el;
+        const arrowsSave = arrows.map((a) => ({
+          path: a.path,
+          from: {nodeId: a.from.node.id, side: a.from.side},
+          to: {nodeId: a.to.node.id, side: a.to.side},
+        }));
 
-        return {tagName, zIndex, type, position: realPosition, id, elementType, size: realSize, navigateLink};
+        const props = isHtmlCanvasNode(el)
+          ? {tagName: el.tagName}
+          : isFunctionCanvasNode(el)
+            ? {navigateLink: el.navigateLink}
+            : isVariableCanvasNode(el)
+              ? {value: el.value, dataType: el.dataType, variableType: el.variableType}
+              : {};
+
+        return {name, zIndex, type, position: realPosition, id, size: realSize, arrows: arrowsSave, ...props};
       }),
     );
 

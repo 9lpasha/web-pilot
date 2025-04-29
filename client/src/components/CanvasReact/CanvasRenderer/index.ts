@@ -14,7 +14,7 @@ export class CanvasRenderer {
 
   /** Отрисовка всех фигур и стрелок */
   public draw() {
-    const {nodesManager, canvasController, arrowManager} = this.manager;
+    const {nodesManager, canvasController} = this.manager;
 
     // Очищаем canvas перед отрисовкой
     if (canvasController.isChangedSizePosition) {
@@ -35,15 +35,19 @@ export class CanvasRenderer {
     });
 
     // Отрисовка стрелок
-    arrowManager.arrows.forEach((arrow) => {
-      if (arrow.from.node !== canvasController.movingNode && arrow.to.node !== canvasController.movingNode)
-        drawConnectArrow(this.ctx, arrow.path);
-    });
+    nodesManager.nodes
+      .map((n) => n.arrows)
+      .flat()
+      .forEach((arrow) => {
+        if (arrow.from.node !== canvasController.movingNode && arrow.to.node !== canvasController.movingNode) {
+          drawConnectArrow(this.ctx, arrow.path, arrow === canvasController.hoverItem.current);
+        }
+      });
   }
 
   /** Отрисовка перетаскиваемой ноды */
   public drawMovingNode() {
-    const {canvasController, arrowManager} = this.manager;
+    const {canvasController} = this.manager;
 
     if (!canvasController.redrawedCanvasAfterMovingNode) {
       canvasController.redrawedCanvasAfterMovingNode = true;
@@ -55,13 +59,13 @@ export class CanvasRenderer {
     if (canvasController.movingNode) {
       canvasController.movingNode.draw(this.ctxTemp);
 
-      const arrows = arrowManager.arrows.filter(
-        (arrow) => arrow.from.node === canvasController.movingNode || arrow.to.node === canvasController.movingNode,
+      this.manager.nodesManager.nodes.forEach((n) =>
+        n.arrows.forEach((a) => {
+          if (a.to.node === canvasController.movingNode || a.from.node === canvasController.movingNode) {
+            drawConnectArrow(this.ctxTemp, a.path);
+          }
+        }),
       );
-
-      arrows.forEach((arrow) => {
-        drawConnectArrow(this.ctxTemp, arrow.path);
-      });
     }
   }
 }

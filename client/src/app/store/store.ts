@@ -1,7 +1,7 @@
 import {create} from 'zustand';
 import {devtools, persist, createJSONStorage} from 'zustand/middleware';
 
-import {CanvasNodeStore, FunctionNode, GlobalCanvasInfo} from '@/shared/types';
+import {CanvasNodeStore, FunctionStore, GlobalCanvasInfo, VariableStore} from '@/shared/types';
 import {parseHtmlFile} from '@shared/lib';
 
 import {AppStore} from './types';
@@ -12,7 +12,7 @@ export const useAppStore = create<AppStore>()(
       (set) => ({
         htmlNodes: [],
         mainCanvasNodes: [],
-        functions: [],
+        functions: {},
         globalCanvasInfo: {main: undefined, functions: {}},
 
         createHtmlNodes: async (file: File) => {
@@ -25,16 +25,20 @@ export const useAppStore = create<AppStore>()(
             throw Error(err?.response?.data?.error);
           }
         },
-        createFunction: (func: FunctionNode) => {
-          set((state) => ({...state, functions: [...state.functions, func]}));
+        createFunction: (func: FunctionStore) => {
+          set((state) => ({...state, functions: {...state.functions, [func.id]: func}}));
         },
         saveCanvasNodes: (mainCanvasNodes: CanvasNodeStore[]) => {
           set({mainCanvasNodes});
         },
-        saveFunctionNodes: (functionNodes: CanvasNodeStore[], functionId: string) => {
+        saveFunctionNodes: (nodes: CanvasNodeStore[], functionId: string) => {
           set((state) => {
-            const functions = state.functions.map((f) => (f.id === functionId ? {...f, nodes: functionNodes} : f));
-            return {...state, functions};
+            return {...state, functions: {...state.functions, [functionId]: {...state.functions[functionId], nodes}}};
+          });
+        },
+        saveFunctionVariables: (variables: VariableStore[], functionId: string) => {
+          set((state) => {
+            return {...state, functions: {...state.functions, [functionId]: {...state.functions[functionId], variables}}};
           });
         },
         saveGlobalCanvasInfo: (globalCanvasInfo: GlobalCanvasInfo | undefined) => {
@@ -47,7 +51,7 @@ export const useAppStore = create<AppStore>()(
           }));
         },
         resetStore: () => {
-          set({htmlNodes: [], mainCanvasNodes: [], functions: [], globalCanvasInfo: undefined});
+          set({htmlNodes: [], mainCanvasNodes: [], functions: {}, globalCanvasInfo: undefined});
         },
       }),
       {

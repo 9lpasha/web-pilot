@@ -11,7 +11,7 @@ export function CreateFunctionModal({onClose}: {onClose: () => void}) {
     if (functionName.trim()) {
       const id = `${new Date().getTime()}`;
 
-      createFunction({id, name: functionName, nodes: []});
+      createFunction({id, name: functionName, nodes: [], variables: []});
       onClose();
     }
   };

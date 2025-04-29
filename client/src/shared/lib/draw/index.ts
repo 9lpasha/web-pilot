@@ -7,3 +7,4 @@ export {drawTempConnectArrow} from './drawTempConnectArrow';
 export {drawText} from './drawText';
 export {drawRedCross} from './drawRedCross';
 export {drawPropsRect} from './drawPropsRect';
+export {drawNodeType} from './drawNodeType';

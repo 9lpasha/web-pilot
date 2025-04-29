@@ -4,19 +4,19 @@ import {Point} from '@/shared/types';
 import {DEFAULT_NODE_SIZE} from '@shared/constants';
 import {Scale} from '@shared/globalCanvasState';
 
-import {CanvasNode} from '../CanvasNode';
+import {AnyCanvasNode, isVariableCanvasNode} from '../CanvasNode';
 import {ElementType} from '../CanvasReact.types';
 
 interface CreateConnectPoint {
-  node: CanvasNode;
+  node: AnyCanvasNode;
 }
 
-const {x, y, height, width} = DEFAULT_NODE_SIZE.props;
+const {x, y, height, width} = DEFAULT_NODE_SIZE.bottomLeftPos;
 
 export class NodePropsButton {
   private x: number;
   private y: number;
-  public node: CanvasNode;
+  public node: AnyCanvasNode;
   public elementType = ElementType.NodePropsButton;
 
   constructor({node}: CreateConnectPoint) {
@@ -34,6 +34,7 @@ export class NodePropsButton {
 
   /** Проверка, попала ли мышь на точку */
   public isPointInside(mousePos: Point) {
+    if (isVariableCanvasNode(this.node)) return;
     return (
       this.node.type === NodeType.htmlElement &&
       mousePos.x >= this.x * Scale &&
@@ -44,14 +45,15 @@ export class NodePropsButton {
   }
 
   public draw(ctx: CanvasRenderingContext2D, isHover: boolean) {
-    const {props} = DEFAULT_NODE_SIZE;
+    const {bottomLeftPos} = DEFAULT_NODE_SIZE;
 
-    // Рисуем крест при наведении
+    // Рисуем кнопку при наведении
     if (isHover && this.node.type === NodeType.htmlElement) {
-      const x = this.node.position.x + props.x * Scale;
-      const y = this.node.position.y + props.y * Scale;
+      const x = this.node.position.x + bottomLeftPos.x * Scale;
+      const y = this.node.position.y + bottomLeftPos.y * Scale;
+      const text = isVariableCanvasNode(this.node) ? this.node.value : '';
 
-      drawPropsRect({ctx, x, y, isHovered: this.node.manager.canvasController.hoverItem.current === this});
+      drawPropsRect({ctx, x, y, isHovered: this.node.manager.canvasController.hoverItem.current === this, text});
     }
   }
 }

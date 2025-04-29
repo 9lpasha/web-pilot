@@ -20,8 +20,20 @@ export const operators = [
     description: 'Оператор множественного выбора',
   },
   {
+    name: '==',
+    description: 'Проверка равенства',
+  },
+  {
     name: '=',
     description: 'Присваивание значения переменной',
+  },
+  {
+    name: '+',
+    description: 'Плюс',
+  },
+  {
+    name: '-',
+    description: 'Минус',
   },
   {
     name: 'return',
@@ -54,5 +66,72 @@ export const operators = [
   {
     name: 'not',
     description: 'Логическое НЕ (!)',
+  },
+];
+
+export const apiFunctions = [
+  {
+    name: 'console.log',
+    description: 'Вывод в консоль',
+  },
+  {
+    name: 'console.error',
+    description: 'Вывод ошибки в консоль',
+  },
+  {
+    name: 'console.warning',
+    description: 'Вывод предупреждения в консоль',
+  },
+  {
+    name: 'setTimeout',
+    description: 'Создать таймаут',
+  },
+  {
+    name: 'setInterval',
+    description: 'Создать интервал',
+  },
+  {
+    name: 'window.alert',
+    description: 'Выводит модальное окно с текстом',
+  },
+];
+
+export const apiObjects = [
+  {
+    name: 'localStorage',
+    description: 'Браузерное хранилище',
+  },
+  {
+    name: 'sessionStorage',
+    description: 'Браузерное хранилище, удаляется при закрытии вкладки',
+  },
+  {
+    name: 'cookies',
+    description: 'Cookies хранилище',
+  },
+  {
+    name: 'location.href',
+    description: 'Ссылка в поисковой строке',
+  },
+  {
+    name: 'screen',
+    description: 'Объект со свойствами экрана',
+  },
+  {
+    name: 'timeZone',
+    description: 'Данные вашего часового пояса',
+  },
+  {
+    name: 'navigator.language',
+    description: 'Язык',
+  },
+  {
+    name: 'navigator.userAgent',
+    description: 'Код вашего устройства',
+  },
+  {
+    name: 'getCurrentPosition',
+    description: 'Текущая геопозиция',
+    className: 'break-all',
   },
 ];

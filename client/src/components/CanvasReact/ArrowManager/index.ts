@@ -1,29 +1,19 @@
-import {drawTempConnectArrow} from '@/shared/lib';
+import {drawTempConnectArrow, isValidLink} from '@/shared/lib';
 import {Sizes, Point} from '@/shared/types';
 
 import {CanvasManager} from '../CanvasManager';
-import {CanvasNode} from '../CanvasNode';
-import {Arrow} from '../CanvasReact.types';
 import {ConnectPoint} from '../ConnectPoint';
 
 /** Класс для соединения фигур стрелками */
 export class ArrowManager {
-  public arrows: Arrow[] = [];
   /** Создаваемая стрелка */
-  public tempArrow: null | Arrow = null;
+  public tempArrow: null | {from: ConnectPoint; to: ConnectPoint; path: Point[]} = null;
   /** Стартовая точка, из которой перетаскиваем ноду */
   public startArrowPoint: null | ConnectPoint = null;
   /** Финишная точка, из которой перетаскиваем ноду */
   public finishArrowPoint: null | ConnectPoint = null;
 
   constructor(private manager: CanvasManager) {}
-
-  /** Добавление стрелки между двумя фигурами */
-  public addArrow({from, to, path}: {from: ConnectPoint; to: ConnectPoint; path: Point[]}) {
-    this.arrows.push({from, to, path});
-    from.connected = true;
-    to.connected = true;
-  }
 
   /** Расчет пути временной стрелки */
   private calculatePath(startX: number, startY: number, endX: number, endY: number, nodeParams: Sizes, point?: ConnectPoint): Point[] {
@@ -34,6 +24,9 @@ export class ArrowManager {
         }
       : undefined;
 
+    const {tempArrow} = this.manager.arrowManager;
+    const isInvalidArrow = (tempArrow && isValidLink(tempArrow.from.node, tempArrow.to.node) === false) || false;
+
     return drawTempConnectArrow({
       ctx: this.manager.canvasRenderer.ctxTemp,
       startX,
@@ -42,6 +35,7 @@ export class ArrowManager {
       endY,
       nodeParams,
       side: (this.startArrowPoint as ConnectPoint).side,
+      color: isInvalidArrow ? 'red' : undefined,
       ...optional,
     });
   }
@@ -82,17 +76,8 @@ export class ArrowManager {
 
     if (this.startArrowPoint && this.finishArrowPoint) {
       this.tempArrow = {from: this.startArrowPoint, to: this.finishArrowPoint, path};
+    } else {
+      this.tempArrow = null;
     }
-  }
-
-  /** Удаление стрелок, принадлежащих ноде */
-  public deleteArrowsOfNode(node: CanvasNode) {
-    this.arrows
-      .filter((el) => node === el.from.node || node === el.to.node)
-      .forEach((el) => {
-        el.from.connected = false;
-        el.to.connected = false;
-      });
-    this.arrows = this.arrows.filter((el) => node !== el.from.node && node !== el.to.node);
   }
 }

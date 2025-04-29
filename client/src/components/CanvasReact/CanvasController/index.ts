@@ -1,4 +1,7 @@
+import {Modal} from 'antd';
+
 import {SIDEBAR_WIDTH, CANVAS_QUADRO_SIZE} from '@/shared/constants';
+import {isValidLink} from '@/shared/lib';
 import {
   CanvasHtmlOptions,
   CanvasWindowOptions,
@@ -8,15 +11,16 @@ import {
   setScale,
 } from '@shared/globalCanvasState';
 
+import {Arrow} from '../Arrow';
 import {CanvasManager} from '../CanvasManager';
-import {CanvasNode} from '../CanvasNode';
+import {CanvasNode, isFunctionCanvasNode} from '../CanvasNode';
 import {ActionsState, ElementType, ReactStoreForCanvas, WithPrevState} from '../CanvasReact.types';
 import {ConnectPoint} from '../ConnectPoint';
 import {Cross} from '../Cross';
 import {FunctionLink} from '../FunctionLink';
 import {NodePropsButton} from '../NodePropsButton';
 
-type HoverItemType = CanvasNode | ConnectPoint | Cross | NodePropsButton | FunctionLink;
+type HoverItemType = CanvasNode | ConnectPoint | Cross | NodePropsButton | FunctionLink | Arrow;
 
 export class CanvasController {
   /** Состояние канваса */
@@ -70,7 +74,7 @@ export class CanvasController {
           this.movingNode = hovered as CanvasNode;
           this.state = ActionsState.movingNode;
 
-          this.currentMovingNodePosition = {...hovered.position};
+          this.currentMovingNodePosition = 'position' in hovered ? {...hovered.position} : {x: 0, y: 0};
         } else if (hovered.elementType === ElementType.ConnectPoint) {
           this.manager.arrowManager.startArrowPoint = hovered as ConnectPoint;
           this.state = ActionsState.creatingArrow;
@@ -121,11 +125,11 @@ export class CanvasController {
             x: e.offsetX - node.position.x,
             y: e.offsetY - node.position.y,
           };
-
           const point = node.checkInsideConnectPoints(mousePos);
           const cross = node.checkInsideCross(mousePos);
           const propsButton = node.checkInsidePropsButton(mousePos);
-          const functionLink = node.checkInsideFunctionLink(mousePos);
+          const functionLink = isFunctionCanvasNode(node) ? node.checkInsideFunctionLink(mousePos) : undefined;
+          const arrow = node.checkInsideArrow(mousePos);
 
           if (point) {
             this.setHover(point);
@@ -139,9 +143,29 @@ export class CanvasController {
             this.setHover(propsButton);
           } else if (functionLink) {
             this.setHover(functionLink);
+          } else if (arrow) {
+            this.setHover(arrow);
           }
         } else {
-          this.resetHover();
+          const mousePos = {
+            x: e.offsetX,
+            y: e.offsetY,
+          };
+          const arrow = nodesManager.nodes.reduce(
+            (acc, node) => {
+              const arrow = node.checkInsideArrow(mousePos);
+
+              if (arrow) {
+                this.setHover(arrow);
+                acc = arrow;
+              }
+
+              return acc;
+            },
+            null as Arrow | null,
+          );
+
+          if (!arrow) this.resetHover();
         }
 
         if (this.hoverItem.prev !== this.hoverItem.current) canvasRenderer.draw();
@@ -170,7 +194,8 @@ export class CanvasController {
     this.state = ActionsState.default;
 
     if (arrowManager.startArrowPoint && arrowManager.finishArrowPoint && arrowManager.tempArrow) {
-      arrowManager.addArrow(arrowManager.tempArrow);
+      if (isValidLink(arrowManager.tempArrow.from.node, arrowManager.tempArrow.to.node))
+        arrowManager.tempArrow.from.node.addArrow(arrowManager.tempArrow);
       arrowManager.tempArrow = null;
     }
 
@@ -193,13 +218,21 @@ export class CanvasController {
       this.state = ActionsState.default;
       this.manager.canvasRenderer.draw();
     } else if (hovered?.elementType === ElementType.NodePropsButton && 'node' in hovered) {
-      reactStore.openModal();
+      reactStore.openModal?.();
 
       this.state = ActionsState.default;
       this.resetHover();
       this.manager.canvasRenderer.draw();
     } else if (hovered?.elementType === ElementType.FunctionLink && 'node' in hovered) {
-      hovered?.node.navigate(e);
+      if (isFunctionCanvasNode(hovered.node)) hovered?.node.navigate(e);
+    } else if (hovered?.elementType === ElementType.Arrow && 'node' in hovered) {
+      Modal.confirm({
+        title: 'Подтверждение',
+        content: 'Удалить стрелку?',
+        onOk() {
+          hovered.node.deleteArrow(hovered as Arrow);
+        },
+      });
     }
   }
 

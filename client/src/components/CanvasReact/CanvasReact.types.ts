@@ -1,8 +1,6 @@
 import {AppStore} from '@/app/store/types';
-import {Point} from '@/shared/types';
 
 import {CanvasNode} from './CanvasNode';
-import {ConnectPoint} from './ConnectPoint';
 
 export enum ActionsState {
   default,
@@ -18,12 +16,7 @@ export enum ElementType {
   Cross,
   NodePropsButton,
   FunctionLink,
-}
-
-export interface Arrow {
-  from: ConnectPoint;
-  to: ConnectPoint;
-  path: Point[];
+  Arrow,
 }
 
 export type WithPrevState<T> = {
@@ -32,9 +25,9 @@ export type WithPrevState<T> = {
 };
 
 export interface ReactStoreForCanvas {
-  navigate: (route: string) => void;
-  returnNode: (node: CanvasNode) => void;
-  openModal: () => void;
+  navigate?: (route: string) => void;
+  returnNode?: (node: CanvasNode) => void;
+  openModal?: () => void;
   saveCanvasNodes: AppStore['saveCanvasNodes'];
   saveGlobalCanvasInfo: AppStore['saveGlobalCanvasInfo'];
 }

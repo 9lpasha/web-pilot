@@ -1,6 +1,6 @@
 import {DataNode} from 'antd/es/tree';
 
-import {CanvasNodeStore, FunctionNode, GlobalCanvasInfo} from '@/shared/types';
+import {CanvasNodeStore, FunctionStore, GlobalCanvasInfo, VariableStore} from '@/shared/types';
 
 /**
  * Примитивы хранилища
@@ -8,7 +8,7 @@ import {CanvasNodeStore, FunctionNode, GlobalCanvasInfo} from '@/shared/types';
 type StorePrimitives = {
   readonly htmlNodes: DataNode[];
   readonly mainCanvasNodes: CanvasNodeStore[];
-  readonly functions: FunctionNode[];
+  readonly functions: Record<string, FunctionStore>;
 
   readonly globalCanvasInfo: {
     main: GlobalCanvasInfo | undefined;
@@ -20,10 +20,11 @@ type StorePrimitives = {
  * Методы хранилища
  * **/
 type StoreMethods = {
-  readonly createHtmlNodes: (file: File) => void;
-  readonly createFunction: (func: FunctionNode) => void;
+  readonly createHtmlNodes: (file: File) => Promise<void>;
+  readonly createFunction: (func: FunctionStore) => void;
   readonly saveCanvasNodes: (nodes: CanvasNodeStore[]) => void;
   readonly saveFunctionNodes: (functionNodes: CanvasNodeStore[], functionId: string) => void;
+  readonly saveFunctionVariables: (variables: VariableStore[], functionId: string) => void;
   readonly saveGlobalCanvasInfo: (info: GlobalCanvasInfo | undefined) => void;
   readonly saveGlobalCanvasInfoForFunction: (info: GlobalCanvasInfo | undefined, functionId: string) => void;
   readonly resetStore: () => void;

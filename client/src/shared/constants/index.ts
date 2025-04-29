@@ -2,6 +2,8 @@ import {Sizes} from '@/shared/types';
 
 export const SIDEBAR_WIDTH = 250;
 
+export const VARIABLES_MENU_HEIGHT = 120;
+
 export const DEFAULT_CANVAS_SIZE: Sizes = {height: 9000, width: 16000};
 
 export const DEFAULT_NODE_SIZE = {
@@ -38,11 +40,20 @@ export const DEFAULT_NODE_SIZE = {
     x: 150,
     y: 80,
   },
-  props: {
+  topLeftPos: {
     x: 12,
     y: 12,
-    width: 100,
+    height: 22.5,
+  },
+  bottomLeftPos: {
+    x: 12,
+    y: 112,
     height: 25,
+    width: 100,
+  },
+  bottomRightPos: {
+    x: 270,
+    y: 117,
   },
   icon: {
     width: 20,

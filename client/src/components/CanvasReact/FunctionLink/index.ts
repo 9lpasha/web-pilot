@@ -4,20 +4,20 @@ import {Point} from '@/shared/types';
 import {DEFAULT_NODE_SIZE} from '@shared/constants';
 import {Scale} from '@shared/globalCanvasState';
 
-import {CanvasNode} from '../CanvasNode';
+import {FunctionCanvasNode} from '../CanvasNode';
 import {ElementType} from '../CanvasReact.types';
 
 interface CreateConnectPoint {
-  node: CanvasNode;
+  node: FunctionCanvasNode;
 }
 
-const {x, y} = DEFAULT_NODE_SIZE.props;
+const {x, y} = DEFAULT_NODE_SIZE.bottomRightPos;
 const {height, width} = DEFAULT_NODE_SIZE.icon;
 
 export class FunctionLink {
   private x: number;
   private y: number;
-  public node: CanvasNode;
+  public node: FunctionCanvasNode;
   public elementType = ElementType.FunctionLink;
 
   constructor({node}: CreateConnectPoint) {
@@ -36,7 +36,6 @@ export class FunctionLink {
   /** Проверка, попала ли мышь на точку */
   public isPointInside(mousePos: Point) {
     return (
-      this.node.type === NodeType.function &&
       mousePos.x >= this.x * Scale &&
       mousePos.x <= (this.x + width) * Scale &&
       mousePos.y >= this.y * Scale &&
@@ -45,9 +44,9 @@ export class FunctionLink {
   }
 
   public draw(ctx: CanvasRenderingContext2D, isHover: boolean) {
-    const {props, icon} = DEFAULT_NODE_SIZE;
-    const x = this.node.position.x + props.x * Scale;
-    const y = this.node.position.y + props.y * Scale;
+    const {icon, bottomRightPos} = DEFAULT_NODE_SIZE;
+    const x = this.node.position.x + bottomRightPos.x * Scale;
+    const y = this.node.position.y + bottomRightPos.y * Scale;
 
     const multiplier = this.node.manager.canvasController.hoverItem.current === this ? 1.1 : 1;
 

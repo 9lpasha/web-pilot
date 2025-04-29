@@ -1,10 +1,14 @@
 import {Spin} from 'antd';
-import {useState} from 'react';
-import {Route, BrowserRouter as Router, Routes} from 'react-router-dom';
+import {FC, useState} from 'react';
+import {Route, BrowserRouter as Router, Routes, useParams} from 'react-router-dom';
 
-import {CanvasPlayground} from '@/components';
 import {FunctionPage, MainPage, WelcomePage} from '@/pages';
 import {useLoadImages} from '@/shared/hooks';
+
+const PageWrapperWithKey = ({Component}: {Component: FC}) => {
+  const {id} = useParams();
+  return <Component key={id} />;
+};
 
 export const App = () => {
   const [isReadyForRendering, setIsReadyForRendering] = useState(false);
@@ -15,9 +19,8 @@ export const App = () => {
     <>
       <Router>
         <Routes>
-          <Route key='/functions' path='/functions/:id' element={<FunctionPage />} />
+          <Route key='/function' path='/function/:id' element={<PageWrapperWithKey Component={FunctionPage} />} />
           <Route key='/main' path='/main' element={<MainPage />} />
-          <Route key='/playground' path='/playground' element={<CanvasPlayground />} />
           <Route key='/' path='/' element={<WelcomePage />} />
         </Routes>
       </Router>

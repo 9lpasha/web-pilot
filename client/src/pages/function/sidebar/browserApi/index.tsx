@@ -7,13 +7,13 @@ import {apiFunctions, apiObjects} from '../constants';
 
 export const SidebarBrowserApi = ({onClickNode}: {onClickNode: (node: NodeUI) => void}) => {
   const [showBrowserApi, setShowBrowserApi] = useState<boolean>(() => {
-    const value = sessionStorage.getItem('showBrowserApi');
+    const value = localStorage.getItem('showBrowserApi');
 
     return value ? JSON.parse(value) : false;
   });
 
   useEffect(() => {
-    sessionStorage.setItem('showBrowserApi', JSON.stringify(showBrowserApi));
+    localStorage.setItem('showBrowserApi', JSON.stringify(showBrowserApi));
   }, [showBrowserApi]);
 
   return (

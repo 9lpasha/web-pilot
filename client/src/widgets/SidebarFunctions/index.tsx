@@ -17,13 +17,13 @@ export const SidebarFunctions = ({onClickFunction}: {onClickFunction: (node: Nod
 
   const [showModal, setShowModal] = useState(false);
   const [showFunctions, setShowFunctions] = useState<boolean>(() => {
-    const value = sessionStorage.getItem('showFunctions');
+    const value = localStorage.getItem('showFunctions');
 
     return value ? JSON.parse(value) : false;
   });
 
   useEffect(() => {
-    sessionStorage.setItem('showFunctions', JSON.stringify(showFunctions));
+    localStorage.setItem('showFunctions', JSON.stringify(showFunctions));
   }, [showFunctions]);
 
   return (

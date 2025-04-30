@@ -9,6 +9,7 @@ type StorePrimitives = {
   readonly htmlNodes: DataNode[];
   readonly mainCanvasNodes: CanvasNodeStore[];
   readonly functions: Record<string, FunctionStore>;
+  readonly htmlContent: string;
 
   readonly globalCanvasInfo: {
     main: GlobalCanvasInfo | undefined;

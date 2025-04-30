@@ -7,13 +7,13 @@ import {operators} from '../constants';
 
 export const SidebarOperators = ({onClickNode}: {onClickNode: (node: NodeUI) => void}) => {
   const [showOperators, setShowOperators] = useState<boolean>(() => {
-    const value = sessionStorage.getItem('showOperators');
+    const value = localStorage.getItem('showOperators');
 
     return value ? JSON.parse(value) : false;
   });
 
   useEffect(() => {
-    sessionStorage.setItem('showOperators', JSON.stringify(showOperators));
+    localStorage.setItem('showOperators', JSON.stringify(showOperators));
   }, [showOperators]);
 
   return (

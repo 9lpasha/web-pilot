@@ -1,3 +1,7 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+// TODO: типизировать
+
 import {CanvasNodeStore, VariableStore} from '../types';
 import {buildDirectionalLinks} from './buildDirectionalLinks';
 import {NodeType} from '../enums';

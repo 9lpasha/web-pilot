@@ -4,7 +4,6 @@ import {Link, useNavigate} from 'react-router-dom';
 
 import {NodesManager} from '@/components/CanvasReact/NodesManager';
 import {SIDEBAR_WIDTH} from '@/shared/constants';
-import {generateJs} from '@/shared/lib';
 import {SidebarFunctions} from '@/widgets/SidebarFunctions';
 import {HomeFilled, ArrowLeftOutlined} from '@ant-design/icons';
 import {FunctionStore, NodeUI} from '@shared/types';
@@ -35,7 +34,7 @@ export function FunctionsSidebar({func, addNode}: Props) {
 
   return (
     <aside className='h-screen bg-gray-900 text-white relative' style={{width: SIDEBAR_WIDTH}}>
-      <div className='h-[calc(100%-64px)] overflow-auto flex flex-col gap-4 p-4'>
+      <div className='h-[calc(100%-112px)] overflow-auto flex flex-col gap-4 p-4'>
         <div className='flex gap-4'>
           <Link to='/main'>
             <Button type='primary' icon={<HomeFilled />} className='text-lg flex items-center text-white w-full shrink-0' />
@@ -63,13 +62,23 @@ export function FunctionsSidebar({func, addNode}: Props) {
         <SidebarBrowserApi onClickNode={onClickNode} />
       </div>
 
-      <Button
-        type='primary'
-        className='absolute! left-4 bottom-4 w-[calc(100%-32px)]'
-        onClick={() => console.log(generateJs(func.variables, func.nodes))}
-      >
-        Генерация кода
-      </Button>
+      <div className='absolute! left-4 bottom-4 w-[calc(100%-32px)]'>
+        <Button type='primary' className='w-full mb-4' onClick={() => navigate('/application')}>
+          Предпросмотр
+        </Button>
+
+        <Button
+          type='primary'
+          className='w-full'
+          onClick={() => {
+            // navigate('/application');
+            // return;
+            // console.log(generateJs(func.variables, func.nodes));
+          }}
+        >
+          Генерация кода
+        </Button>
+      </div>
     </aside>
   );
 }

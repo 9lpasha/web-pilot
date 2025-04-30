@@ -24,6 +24,10 @@ export const operators = [
     description: 'Проверка равенства',
   },
   {
+    name: '!=',
+    description: 'Проверка неравенства',
+  },
+  {
     name: '=',
     description: 'Присваивание значения переменной',
   },

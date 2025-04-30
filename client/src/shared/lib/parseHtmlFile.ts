@@ -1,6 +1,8 @@
 import {DataNode} from 'antd/es/tree';
 
-export async function parseHtmlFile(file: File): Promise<DataNode[] | undefined> {
+import {AppStore} from '@/app/store/types';
+
+export async function parseHtmlFile(file: File, set: (partial: Partial<AppStore>) => void): Promise<DataNode[] | undefined> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -20,6 +22,7 @@ export async function parseHtmlFile(file: File): Promise<DataNode[] | undefined>
         children: Array.from(element.children).map(traverse),
       });
 
+      set({htmlContent: reader.result as string});
       resolve(Array.from(body.children).map(traverse));
     };
 

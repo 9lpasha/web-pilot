@@ -14,10 +14,11 @@ export const useAppStore = create<AppStore>()(
         mainCanvasNodes: [],
         functions: {},
         globalCanvasInfo: {main: undefined, functions: {}},
+        htmlContent: '',
 
         createHtmlNodes: async (file: File) => {
           try {
-            const htmlNodes = await parseHtmlFile(file);
+            const htmlNodes = await parseHtmlFile(file, set);
 
             set({htmlNodes});
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

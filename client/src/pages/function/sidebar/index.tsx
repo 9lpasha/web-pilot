@@ -2,8 +2,10 @@ import {Button} from 'antd';
 import {useCallback} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 
+import {useStore} from '@/app/store';
 import {NodesManager} from '@/components/CanvasReact/NodesManager';
 import {SIDEBAR_WIDTH} from '@/shared/constants';
+import {generateJs} from '@/shared/lib';
 import {SidebarFunctions} from '@/widgets/SidebarFunctions';
 import {HomeFilled, ArrowLeftOutlined} from '@ant-design/icons';
 import {FunctionStore, NodeUI} from '@shared/types';
@@ -18,6 +20,7 @@ interface Props {
 }
 
 export function FunctionsSidebar({func, addNode}: Props) {
+  const {functions} = useStore();
   const navigate = useNavigate();
 
   const onClickOperator = useCallback((node: NodeUI & {args?: number}) => addNode?.(node.type, node.id, node.name), [addNode]);
@@ -70,10 +73,10 @@ export function FunctionsSidebar({func, addNode}: Props) {
         <Button type='primary' className='w-full mb-4' onClick={() => navigate('/application')}>
           Предпросмотр
         </Button>
-        {/* 
-        <Button type='primary' className='w-full' onClick={() => console.log(generateJs(func.variables, func.nodes, ))}>
+
+        <Button type='primary' className='w-full' onClick={() => console.log(generateJs(func.variables, func.nodes, functions))}>
           Генерация кода
-        </Button> */}
+        </Button>
       </div>
     </aside>
   );

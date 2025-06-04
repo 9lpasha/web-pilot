@@ -13,7 +13,7 @@ export const buildWebpack = (options: WebpackOptions): Configuration => {
     mode,
     entry: paths.entry,
     output: {
-      publicPath: '/',
+      publicPath: '/web-pilot/',
       path: paths.output,
       filename: '[name].[contenthash:8].js',
       clean: true,

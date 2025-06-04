@@ -19,7 +19,7 @@ export const buildPlugins = (options: WebpackOptions): WebpackPluginInstance[] =
   };
 
   const plugins: WebpackPluginInstance[] = [
-    new HtmlWebpackPlugin({template: paths.html, favicon: resolve(paths.public, 'favicon.ico')}),
+    new HtmlWebpackPlugin({template: paths.html, favicon: resolve(paths.public, 'favicon.ico'), publicPath: '/web-pilot/'}),
     new DefinePlugin(appEnvs),
   ];
 

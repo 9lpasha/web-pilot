@@ -17,7 +17,7 @@ export const App = () => {
 
   return isReadyForRendering ? (
     <>
-      <Router>
+      <Router basename='/web-pilot/'>
         <Routes>
           <Route key='/function' path='/function/:id' element={<PageWrapperWithKey Component={FunctionPage} />} />
           <Route key='/main' path='/main' element={<MainPage />} />

@@ -1,5 +1,6 @@
 import {NodeType} from '@/shared/enums';
 
+import {BrowserApiFunctionCanvasNode} from './BrowserApiFunctionCanvasNode';
 import {CanvasNode} from './CanvasNode';
 import {AnyCanvasNode} from './CanvasNode.types';
 import {FunctionCanvasNode} from './FunctionCanvasNode';
@@ -8,6 +9,10 @@ import {VariableCanvasNode} from './VariableCanvasNode';
 
 export const isFunctionCanvasNode = (node: CanvasNode): node is FunctionCanvasNode => {
   return 'navigateLink' in node;
+};
+
+export const isBrowserApiFunctionCanvasNode = (node: CanvasNode): node is BrowserApiFunctionCanvasNode => {
+  return 'args' in node;
 };
 
 export const isVariableCanvasNode = (node: CanvasNode): node is VariableCanvasNode => {

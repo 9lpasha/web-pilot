@@ -28,7 +28,7 @@ export class NodesManager {
       if (n.type === NodeType.htmlElement) return new HtmlCanvasNode({...n, manager, tagName: n.tagName as keyof HTMLElementTagNameMap});
       if (n.type === NodeType.event) return new EventCanvasNode({...n, manager});
       if (n.type === NodeType.function) return new FunctionCanvasNode({...n, manager, navigateLink: n.navigateLink || ''});
-      if (n.type === NodeType.browserApiFunction) return new BrowserApiFunctionCanvasNode({...n, manager});
+      if (n.type === NodeType.browserApiFunction) return new BrowserApiFunctionCanvasNode({...n, manager, args: n.args || 0});
       if (n.type === NodeType.object) return new ObjectCanvasNode({...n, manager});
       if (n.type === NodeType.browserApiObject) return new BrowserApiObjectCanvasNode({...n, manager});
       if (n.type === NodeType.operator) return new OperatorCanvasNode({...n, manager});
@@ -59,7 +59,7 @@ export class NodesManager {
     let node: AnyCanvasNode;
     switch (type) {
       case NodeType.browserApiFunction:
-        node = new BrowserApiFunctionCanvasNode(mainFields);
+        node = new BrowserApiFunctionCanvasNode({...mainFields, args: options?.args || 0});
         break;
       case NodeType.browserApiObject:
         node = new BrowserApiObjectCanvasNode(mainFields);

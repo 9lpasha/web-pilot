@@ -18,6 +18,8 @@ export interface CanvasNodeStoreOptionalFields {
   tagName?: keyof HTMLElementTagNameMap;
   /** для Function ноды */
   navigateLink?: string;
+  /** для Function ноды */
+  args?: number;
   /** для Variable ноды */
   dataType?: VariableType;
   /** для Variable ноды */

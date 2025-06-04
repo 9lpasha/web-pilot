@@ -5,7 +5,7 @@ import {NodeUI} from '@/shared/types';
 
 import {apiFunctions, apiObjects} from '../constants';
 
-export const SidebarBrowserApi = ({onClickNode}: {onClickNode: (node: NodeUI) => void}) => {
+export const SidebarBrowserApi = ({onClickNode}: {onClickNode: (node: NodeUI & {args?: number}) => void}) => {
   const [showBrowserApi, setShowBrowserApi] = useState<boolean>(() => {
     const value = localStorage.getItem('showBrowserApi');
 
@@ -30,7 +30,9 @@ export const SidebarBrowserApi = ({onClickNode}: {onClickNode: (node: NodeUI) =>
             <div
               key={operator.name}
               className='p-2 bg-gray-700 rounded cursor-pointer hover:bg-gray-600'
-              onClick={() => onClickNode({id: `${new Date().getTime()}`, type: NodeType.browserApiFunction, name: operator.name})}
+              onClick={() =>
+                onClickNode({id: `${new Date().getTime()}`, type: NodeType.browserApiFunction, name: operator.name, args: operator.args})
+              }
             >
               {operator.name} ({operator.description})
             </div>

@@ -5,6 +5,7 @@
 import {CanvasNodeStore, VariableStore} from '../types';
 import {buildDirectionalLinks} from './buildDirectionalLinks';
 import {NodeType} from '../enums';
+import {getStringFromNode} from './getStringFromNode';
 
 type ConnectedSides = {
   node: CanvasNodeStore;
@@ -14,182 +15,180 @@ type ConnectedSides = {
   right: ConnectedSides[];
 };
 
-type ASTNode =
-  | {type: 'Literal'; value: number | string | boolean | null}
-  | {type: 'Identifier'; name: string}
-  | {type: 'BinaryExpression'; operator: string; left: ASTNode; right: ASTNode}
-  | {type: 'VariableDeclaration'; name: string; value: ASTNode}
-  | {type: 'ReturnStatement'; value: ASTNode}
-  | {type: 'CallExpression'; callee: string; arguments: ASTNode[]};
+const stepFunctionStack = (functionStack: number[], result: string) => {
+  if (!functionStack.length) return result;
 
-function buildAST(nodes: Partial<CanvasNodeStore>[]): ASTNode {
-  let i = 0;
-
-  function next(): Partial<CanvasNodeStore> | undefined {
-    return nodes[i++];
+  if (functionStack[functionStack.length - 1] === 0) {
+    functionStack.length = functionStack.length - 1;
+    result += ') ';
+  } else {
+    functionStack[functionStack.length - 1] -= 1;
   }
 
-  function peek(): Partial<CanvasNodeStore> | undefined {
-    return nodes[i];
-  }
+  return result;
+};
 
-  function parseExpression(): ASTNode {
-    const node = next();
-    if (!node) throw new Error('Unexpected end of input');
-
-    // Variable declaration: let x = 5
-    if (node.name === 'let' || node.name === 'const') {
-      const kind = node.name; // "let" | "const"
-      const idNode = next();
-      const eqNode = next();
-      if (!idNode || !eqNode || eqNode.name !== '=') {
-        throw new Error(`Invalid ${kind} declaration`);
-      }
-
-      return {
-        type: 'VariableDeclaration',
-        kind,
-        declarations: [
-          {
-            type: 'VariableDeclarator',
-            id: {type: 'Identifier', name: idNode.name},
-            init: parseExpression(),
-          },
-        ],
-      };
-    }
-
-    // Assignment: x = 5
-    if (node.type === 'variable' || node.type === 'function' || node.type === 'object') {
-      const nextNode = peek();
-      if (nextNode?.name === '=') {
-        next(); // consume '='
-        return {
-          type: 'AssignmentExpression',
-          operator: '=',
-          left: {type: 'Identifier', name: node.name},
-          right: parseExpression(),
-        };
-      }
-
-      if (nextNode?.name === 'call') {
-        next(); // consume 'call'
-        return {
-          type: 'CallExpression',
-          callee: {type: 'Identifier', name: node.name},
-          arguments: [parseExpression()], // simplistic: assumes single arg
-        };
-      }
-
-      return {type: 'Identifier', name: node.name};
-    }
-
-    // Binary operators
-    if (node.type === 'operator') {
-      if (['+', '-', '==', '&&', '||'].includes(node.name)) {
-        return {
-          type: 'BinaryExpression',
-          operator: node.name,
-          left: parseExpression(),
-          right: parseExpression(),
-        };
-      }
-
-      if (node.name === 'return') {
-        return {
-          type: 'ReturnStatement',
-          argument: parseExpression(),
-        };
-      }
-
-      if (node.name === 'break' || node.name === 'continue') {
-        return {
-          type: `${node.name[0].toUpperCase()}${node.name.slice(1)}Statement`,
-        };
-      }
-
-      if (node.name === 'if') {
-        return {
-          type: 'IfStatement',
-          test: parseExpression(),
-          consequent: parseExpression(),
-          alternate: peek()?.name === 'else' ? (next(), parseExpression()) : null,
-        };
-      }
-
-      if (node.name === 'while') {
-        return {
-          type: 'WhileStatement',
-          test: parseExpression(),
-          body: parseExpression(),
-        };
-      }
-
-      if (node.name === 'for') {
-        return {
-          type: 'ForStatement',
-          init: parseExpression(),
-          test: parseExpression(),
-          update: parseExpression(),
-          body: parseExpression(),
-        };
-      }
-
-      if (node.name === 'function') {
-        const funcName = next();
-        const body = parseExpression();
-        return {
-          type: 'FunctionDeclaration',
-          id: {type: 'Identifier', name: funcName?.name},
-          params: [],
-          body: {
-            type: 'BlockStatement',
-            body: [body],
-          },
-        };
-      }
-    }
-
-    throw new Error(`Unhandled node: ${JSON.stringify(node)}`);
-  }
-
-  const body: ASTNode[] = [];
-
-  while (i < nodes.length) {
-    body.push(parseExpression());
-  }
-
-  return {
-    type: 'Program',
-    body,
-  };
-}
-
-export const generateJs = (variables: VariableStore[], nodes: CanvasNodeStore[]) => {
+export const generateJs = (variables: VariableStore[], nodes: CanvasNodeStore[], functionsStore: Record<string, FunctionStore>) => {
   const links = buildDirectionalLinks(nodes);
   const first = Object.values(links).find((l) => !l.left.length && !l.top.length)!;
+  const functionStack: number[] = [];
   let current: ConnectedSides | null = first;
-  let baseCurrent: ConnectedSides | null = first;
-  const tokens = [] as Partial<CanvasNodeStore>[];
+  let result = '';
+  const functions: Record<string, string> = {};
+
+  nodes
+    .filter((n) => n.type === NodeType.function)
+    .forEach((n) => {
+      if (functions[n.id]) return;
+
+      functions[n.id] = n.name;
+
+      const funcId = n?.navigateLink?.match(/\d+/g)?.[0] || '';
+
+      result += `function ${n.name}() {
+  ${generateJs(functionsStore[funcId].variables, functionsStore[funcId].nodes, functionsStore)}
+}
+`;
+    });
 
   variables.forEach((v) => {
-    tokens.push({name: v.variableType || '', type: NodeType.operator, id: v.id + '-1'});
-    tokens.push({name: v.name, type: NodeType.variable, id: v.id + '-2'});
-    tokens.push({name: '=', type: NodeType.operator, id: v.id + '-3'});
-    tokens.push({name: (v.value || '').toString(), type: NodeType.variable, id: v.id + '-4'});
+    result += `${v.variableType || ''} ${v.name} = ${(v.value || '').toString()};
+`;
   });
 
   while (current) {
-    tokens.push(current.node);
+    // ОБРАБОТКА IF
+    if (current && current.node.type === NodeType.operator && current.node.name === 'if') {
+      const nodeIf: ConnectedSides | null = current;
+      let condition = '';
+      let blockMain = '';
+      let blockElse = '';
 
+      current = current.right[0];
+      while (current) {
+        condition += getStringFromNode(current.node, functionStack);
+        condition = stepFunctionStack(functionStack, condition);
+        if (current.right.length) current = current.right[0];
+        else current = null;
+      }
+
+      const bottoms = nodeIf.bottom.sort((a, b) => a.node.position.y - b.node.position.y);
+      current = bottoms[0];
+      while (current) {
+        blockMain += getStringFromNode(current.node, functionStack);
+        blockMain = stepFunctionStack(functionStack, blockMain);
+        if (current.right.length) current = current.right[0];
+        else current = null;
+      }
+
+      current = bottoms[1];
+      while (current) {
+        blockElse += getStringFromNode(current.node, functionStack);
+        blockElse = stepFunctionStack(functionStack, blockElse);
+        if (current.right.length) current = current.right[0];
+        else current = null;
+      }
+
+      current = bottoms[2];
+      result += `
+if (${condition}) {
+  ${blockMain};
+} else {
+  ${blockElse};
+}
+
+      `;
+      continue;
+    }
+
+    // ОБРАБОТКА WHILE
+    if (current && current.node.type === NodeType.operator && current.node.name === 'while') {
+      const nodeWhile: ConnectedSides | null = current;
+      let condition = '';
+      let blockMain = '';
+
+      current = current.right[0];
+      while (current) {
+        condition += getStringFromNode(current.node, functionStack);
+        condition = stepFunctionStack(functionStack, condition);
+        if (current.right.length) current = current.right[0];
+        else current = null;
+      }
+
+      const bottoms = nodeWhile.bottom.sort((a, b) => a.node.position.y - b.node.position.y);
+      current = bottoms[0];
+      while (current) {
+        blockMain += getStringFromNode(current.node, functionStack);
+        blockMain = stepFunctionStack(functionStack, blockMain);
+        if (current.right.length) current = current.right[0];
+        else current = null;
+      }
+
+      current = bottoms[1];
+      result += `
+while (${condition}) {
+  ${blockMain}
+}
+
+      `;
+      continue;
+    }
+
+    // ОБРАБОТКА FOR
+    if (current && current.node.type === NodeType.operator && current.node.name === 'for') {
+      const nodeFor: ConnectedSides | null = current;
+      let condition1 = '';
+      let condition2 = '';
+      let condition3 = '';
+      let blockMain = '';
+      const rights = nodeFor?.right.sort((a, b) => a.node.position.y - b.node.position.y);
+
+      current = rights[0];
+      while (current) {
+        condition1 += getStringFromNode(current.node, functionStack);
+        condition1 = stepFunctionStack(functionStack, condition1);
+        if (current.right.length) current = current.right[0];
+        else current = null;
+      }
+      current = rights[1];
+      while (current) {
+        condition2 += getStringFromNode(current.node, functionStack);
+        condition2 = stepFunctionStack(functionStack, condition2);
+        if (current.right.length) current = current.right[0];
+        else current = null;
+      }
+      current = rights[2];
+      while (current) {
+        condition3 += getStringFromNode(current.node, functionStack);
+        condition3 = stepFunctionStack(functionStack, condition3);
+        if (current.right.length) current = current.right[0];
+        else current = null;
+      }
+
+      const bottoms = nodeFor.bottom.sort((a, b) => a.node.position.y - b.node.position.y);
+      current = bottoms[0];
+      while (current) {
+        blockMain += getStringFromNode(current.node, functionStack);
+        blockMain = stepFunctionStack(functionStack, blockMain);
+        if (current.right.length) current = current.right[0];
+        else current = null;
+      }
+
+      current = bottoms[1];
+      result += `
+for (${condition1}; ${condition2}; ${condition3}) {
+  ${blockMain}
+}
+
+      `;
+      continue;
+    }
+
+    result += getStringFromNode(current.node, functionStack);
+    result = stepFunctionStack(functionStack, result);
     if (current.right.length) current = current.right[0];
-    else if (baseCurrent.bottom.length) {
-      current = baseCurrent.bottom[0];
-      baseCurrent = baseCurrent.bottom[0];
-    } else current = null;
+    else current = null;
   }
 
-  const userAst = buildAST(tokens);
-
-  return userAst;
+  return result;
 };

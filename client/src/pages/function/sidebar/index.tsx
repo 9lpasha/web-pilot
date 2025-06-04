@@ -20,7 +20,11 @@ interface Props {
 export function FunctionsSidebar({func, addNode}: Props) {
   const navigate = useNavigate();
 
-  const onClickNode = useCallback((node: NodeUI) => addNode?.(node.type, node.id, node.name), [addNode]);
+  const onClickOperator = useCallback((node: NodeUI & {args?: number}) => addNode?.(node.type, node.id, node.name), [addNode]);
+  const onClickBrowserApi = useCallback(
+    (node: NodeUI & {args?: number}) => addNode?.(node.type, node.id, node.name, node.args ? {args: node.args} : undefined),
+    [addNode],
+  );
   const onClickHtmlNode = useCallback(
     (node: NodeUI) => addNode?.(node.type, node.id, node.name, {tagName: node.name as keyof HTMLElementTagNameMap}),
     [addNode],
@@ -58,26 +62,18 @@ export function FunctionsSidebar({func, addNode}: Props) {
         <HtmlNodes onClickNode={onClickHtmlNode} />
         <SidebarFunctions onClickFunction={onClickFunction} />
 
-        <SidebarOperators onClickNode={onClickNode} />
-        <SidebarBrowserApi onClickNode={onClickNode} />
+        <SidebarOperators onClickNode={onClickOperator} />
+        <SidebarBrowserApi onClickNode={onClickBrowserApi} />
       </div>
 
       <div className='absolute! left-4 bottom-4 w-[calc(100%-32px)]'>
         <Button type='primary' className='w-full mb-4' onClick={() => navigate('/application')}>
           Предпросмотр
         </Button>
-
-        <Button
-          type='primary'
-          className='w-full'
-          onClick={() => {
-            // navigate('/application');
-            // return;
-            // console.log(generateJs(func.variables, func.nodes));
-          }}
-        >
+        {/* 
+        <Button type='primary' className='w-full' onClick={() => console.log(generateJs(func.variables, func.nodes, ))}>
           Генерация кода
-        </Button>
+        </Button> */}
       </div>
     </aside>
   );

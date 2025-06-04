@@ -12,14 +12,6 @@ export const operators = [
     description: 'Цикл с предусловием',
   },
   {
-    name: 'do-while',
-    description: 'Цикл с постусловием',
-  },
-  {
-    name: 'switch',
-    description: 'Оператор множественного выбора',
-  },
-  {
     name: '==',
     description: 'Проверка равенства',
   },
@@ -40,24 +32,24 @@ export const operators = [
     description: 'Минус',
   },
   {
+    name: '>',
+    description: 'Плюс',
+  },
+  {
+    name: '>=',
+    description: 'Плюс',
+  },
+  {
+    name: '<',
+    description: 'Плюс',
+  },
+  {
+    name: '<=',
+    description: 'Плюс',
+  },
+  {
     name: 'return',
     description: 'Возвращает значение из функции',
-  },
-  {
-    name: 'break',
-    description: 'Прерывает выполнение цикла или switch',
-  },
-  {
-    name: 'continue',
-    description: 'Пропускает текущую итерацию цикла',
-  },
-  {
-    name: 'function',
-    description: 'Объявление функции',
-  },
-  {
-    name: 'call',
-    description: 'Вызов функции',
   },
   {
     name: 'and',
@@ -77,26 +69,32 @@ export const apiFunctions = [
   {
     name: 'console.log',
     description: 'Вывод в консоль',
+    args: 1,
   },
   {
     name: 'console.error',
     description: 'Вывод ошибки в консоль',
+    args: 1,
   },
   {
     name: 'console.warning',
     description: 'Вывод предупреждения в консоль',
+    args: 1,
   },
   {
     name: 'setTimeout',
     description: 'Создать таймаут',
+    args: 2,
   },
   {
     name: 'setInterval',
     description: 'Создать интервал',
+    args: 2,
   },
   {
     name: 'window.alert',
     description: 'Выводит модальное окно с текстом',
+    args: 1,
   },
 ];
 

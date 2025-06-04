@@ -15,7 +15,12 @@ import {
 import {ArrowManager} from '../ArrowManager';
 import {CanvasController} from '../CanvasController';
 import {CanvasNode} from '../CanvasNode';
-import {isFunctionCanvasNode, isHtmlCanvasNode, isVariableCanvasNode} from '../CanvasNode/CanvasNode.helpers';
+import {
+  isBrowserApiFunctionCanvasNode,
+  isFunctionCanvasNode,
+  isHtmlCanvasNode,
+  isVariableCanvasNode,
+} from '../CanvasNode/CanvasNode.helpers';
 import {ReactStoreForCanvas} from '../CanvasReact.types';
 import {CanvasRenderer} from '../CanvasRenderer';
 import {NodesManager} from '../NodesManager';
@@ -165,7 +170,9 @@ export class CanvasManager {
             ? {navigateLink: el.navigateLink}
             : isVariableCanvasNode(el)
               ? {value: el.value, dataType: el.dataType, variableType: el.variableType}
-              : {};
+              : isBrowserApiFunctionCanvasNode(el)
+                ? {args: el.args}
+                : {};
 
         return {name, zIndex, type, position: realPosition, id, size: realSize, arrows: arrowsSave, ...props};
       }),
